@@ -11,7 +11,7 @@ def hello_world():
     
     return f"hello from movie_mosaic the datetime is {datetime.now()}"
     
-@app.route('/, methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def homepage():
 	if request.method == 'POST':
 		username = request.form['nm']
@@ -20,7 +20,6 @@ def homepage():
 		except Exception("ERROR: Username does not exist"):
 			print('EXCEPTING')
 			return make_response(f'Username {username} does not exist.', 404)
-		
 
 		image = build(movie_cells, username, 'config.json')
 		file_path = file_saver(username, image)
