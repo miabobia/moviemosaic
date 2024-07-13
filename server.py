@@ -9,7 +9,8 @@ app = Flask(__name__)
 def hello_world():
     print("new web request")
     return f"hello from disco!!! the datetime is {datetime.now()}"
-@app.route("/test")
+    
+@app.route('/getimage', methods=['POST', 'GET'])
 def test():
     return f'THIS IS A TEST!!! IM ON THE INTERNET :3'
 
