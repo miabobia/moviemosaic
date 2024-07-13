@@ -1,17 +1,15 @@
 from datetime import datetime
 
-from flask import Flask
+from flask import Flask, render_template
 
 app = Flask(__name__)
 
 
 @app.route("/")
 def hello_world():
-    print("new web request")
-    
-    return f"hello from movie_mosaic the datetime is {datetime.now()}"
-    
-@app.route('/', methods=['POST', 'GET'])
+    return render_template("getimage.html")
+
+@app.route('/getimage', methods=['POST', 'GET'])
 def homepage():
 	if request.method == 'POST':
 		username = request.form['nm']
