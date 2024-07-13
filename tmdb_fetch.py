@@ -3,9 +3,7 @@ Get director name from tmdb api using the tmdbsimple api
 """
 
 import tmdbsimple as tmdb
-import tmdb_auth
 import os
-tmdb.API_KEY = tmdb_auth.api_key
 tmdb.API_KEY = os.environ['TMDB_API_KEY']
 
 
