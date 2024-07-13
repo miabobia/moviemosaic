@@ -11,9 +11,26 @@ def hello_world():
     
     return f"hello from movie_mosaic the datetime is {datetime.now()}"
     
-@app.route('/getimage', methods=['POST', 'GET'])
-def test():
-    return f'THIS IS A TEST!!! IM ON THE INTERNET :3'
+@app.route('/, methods=['POST', 'GET'])
+def homepage():
+	if request.method == 'POST':
+		username = request.form['nm']
+		try:
+			movie_cells = scrape(username, datetime.now().month)
+		except Exception("ERROR: Username does not exist"):
+			print('EXCEPTING')
+			return make_response(f'Username {username} does not exist.', 404)
+		
+
+		image = build(movie_cells, username, 'config.json')
+		file_path = file_saver(username, image)
+		return return_mosaic(file_path)
+	else:
+		username = request.form['nm']
+		image = build(scrape(username, datetime.now().month), username, 'config.json')
+		file_path = file_saver(username, image)
+		return return_mosaic(file_path)
+		return redirect(url_for(f'fetch', filename=file_path))
 
 
 if __name__ == "__main__":
