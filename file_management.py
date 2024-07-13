@@ -17,7 +17,8 @@ def file_cleanup(filter_str: str=''):
         os.remove(f)
 
 def file_saver(username: str, image: "Image") -> str:
-    file_name = f"images/{username}_{uuid.uuid4()}.png"
+    images_dir = os.path.join(os.path.dirname(__file__), 'images')
+    file_name = f"images_dir/{username}_{uuid.uuid4()}.png"
     image.save(f"{file_name}")
     return file_name
 
