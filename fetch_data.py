@@ -26,9 +26,13 @@ async def download_all(name_urls: list[tuple]):
             *[download(name_url, session=session) for name_url in name_urls]
         )
 
-def rss_feed_exists(page_content: bytes) -> bool:
+def rss_feed_exists(username: str) -> bool:
+    # inefficient extra call to url here need to fix!
+    url = f'https://letterboxd.com/{username}/rss/'
+    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    r = requests.get(url, headers=headers)
     
-    return "<title>Letterboxd - Not Found</title>" in page_content.decode("utf-8")
+    return not "<title>Letterboxd - Not Found</title>" in r.content.decode("utf-8")
 
 def scrape(user: str, month: int) -> list:
     # maybe we split this up into two funcs
@@ -37,8 +41,9 @@ def scrape(user: str, month: int) -> list:
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     r = requests.get(url, headers=headers)
 
-    if rss_feed_exists(r.content):
-        raise Exception("ERROR: Username does not exist")
+    # shouldn't need this anymore since it is called before scrape externally
+    # if rss_feed_exists(r.content):
+    #     raise Exception("ERROR: Username does not exist")
     
 
 

@@ -6,5 +6,5 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 
 ## TODO
 - add stars onto posters
-- make into flask app
-- tweak colors and font
+- add string sanitization
+- add periodic file cleaning (current solution could have memory issues)
