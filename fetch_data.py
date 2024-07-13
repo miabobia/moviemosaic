@@ -11,6 +11,7 @@ import aiohttp
 import asyncio
 import aiofiles
 from moviecell import MovieCell
+import os
 
 async def download(name_url: tuple[str], session):
     print(name_url)
@@ -79,7 +80,8 @@ def scrape(user: str, month: int) -> list:
         return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
 
     def title_to_image_path(path: str):
-        return 'images/' + path.replace(' ', '-') + '.png'
+        images_dir = os.path.join(os.path.dirname(__file__), 'images')
+        return images_dir + path.replace(' ', '-') + '.png'
 
     # sorting movies by date
     items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
