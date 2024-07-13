@@ -12,67 +12,6 @@ app = Flask(__name__)
 IMAGES_DIRECTORY = './images'
 
 
-
-# @app.route('/getimage', methods=['POST'])
-
-# def generate_image():
-
-#     username = request.form['nm']
-
-#     try:
-
-#         movie_cells = scrape(username, datetime.now().month)
-
-#     except Exception as e:
-
-#         return make_response(f'Username {username} does not exist.', 404)
-
-
-#     image = build(movie_cells, username, 'config.json')
-
-#     file_path = file_saver(username, image)
-
-#     response = send_file(file_path, as_attachment=True)
-
-#     file_cleanup(IMAGES_DIRECTORY)  # clean up images directory after sending file
-
-#     return response
-
-# @app.route('/getimage', methods=['POST', 'GET'])
-# def homepage():
-# 	if request.method == 'POST':
-# 		username = request.form['nm']
-# 		#return build_mosaic(username)
-# 		try:
-# 			movie_cells = scrape(username, datetime.now().month)
-# 		except Exception("ERROR: Username does not exist"):
-# 			print('EXCEPTING')
-# 			return make_response(f'Username {username} does not exist.', 404)
-
-# 		image = build(movie_cells, username, 'config.json')
-# 		file_path = file_saver(username, image)
-# 		return return_mosaic(file_path)			
-
-# @app.route('/getimage', methods=['POST', 'GET'])
-# def homepage():
-# 	if request.method == 'POST':
-# 		username = request.form['nm']
-# 		try:
-# 			movie_cells = scrape(username, datetime.now().month)
-# 		except Exception("ERROR: Username does not exist"):
-# 			print('EXCEPTING')
-# 			return make_response(f'Username {username} does not exist.', 404)
-
-# 		image = build(movie_cells, username, 'config.json')
-# 		file_path = file_saver(username, image)
-# 		return return_mosaic(file_path)
-# 	else:
-# 		username = request.form['nm']
-# 		image = build(scrape(username, datetime.now().month), username, 'config.json')
-# 		file_path = file_saver(username, image)
-# 		return return_mosaic(file_path)
-# 		return redirect(url_for(f'fetch', filename=file_path))
-
 def validate_submitted_string(s: str) -> bool:
 	# temporary until I figure out how i want to structure this
 	return True
