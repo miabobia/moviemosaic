@@ -13,6 +13,7 @@ import aiofiles
 from moviecell import MovieCell
 
 async def download(name_url: tuple[str], session):
+    print(name_url)
     url = name_url[1]
     filename = name_url[0]
     async with session.get(url) as response:
