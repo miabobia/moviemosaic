@@ -41,7 +41,7 @@ def scrape(user: str, month: int) -> list:
     
 
 
-    soup = BeautifulSoup(r.content, 'xml')
+    soup = BeautifulSoup(r.content, 'lxml')
 
     items = soup.find_all('item')
 
