@@ -1,0 +1,9 @@
+{
+"resize_factor": 0.2,
+"image_gap": 10,
+"info_box_width": 500,
+"username_box_height": 50,
+"movie_info_font_size": 12,
+"username_font_size": 20,
+"font_color": [255, 255, 255]
+}

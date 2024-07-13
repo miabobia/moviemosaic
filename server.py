@@ -8,6 +8,7 @@ app = Flask(__name__)
 @app.route("/")
 def hello_world():
     print("new web request")
+    
     return f"hello from movie_mosaic the datetime is {datetime.now()}"
     
 @app.route('/getimage', methods=['POST', 'GET'])
