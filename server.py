@@ -24,7 +24,7 @@ def dynamic_page(username):
     image_string, image = create_mosaic(username)
     session['image_path'] = file_saver(username=username, image=image)
     download_url = url_for('download_image', username=username)
-    file_cleanup(filter_str=username)
+    # file_cleanup(filter_str=username)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
 
@@ -36,7 +36,7 @@ def download_image(username):
         buffer = io.BytesIO()
         image.save(buffer, format='PNG')
         buffer.seek(0)
-        file_cleanup()
+        # file_cleanup()
         return send_file(buffer, as_attachment=True, download_name=f'{username}.png', mimetype='image/png')
     else:
         return 'Image not found', 404
