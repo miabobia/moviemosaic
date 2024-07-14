@@ -134,7 +134,7 @@ def scrape(user: str, month: int) -> list:
     def title_to_image_path(title: str):
         # make sure we are only taking alphanumeric characters
         title = remove_non_alphanum(title)
-        images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+        images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images/'))
         return images_dir + title.replace(' ', '-') + '.png'
 
     # items = filter(has_watched_date, items)

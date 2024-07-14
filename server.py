@@ -8,11 +8,21 @@ from flask import Flask, redirect, url_for, request, session, send_file, render_
 import io
 import base64
 import secrets
+from apscheduler.schedulers.background import BackgroundScheduler
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.secret_key = secrets.token_urlsafe(16)
+usernames = []
 IMAGES_DIRECTORY = './images'
+
+def file_cleaner():
+    # this is executed every ten minutes
+    file_cleanup()
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(file_cleaner, trigger='interval', minutes=10)
+scheduler.start()
 
 
 def validate_submitted_string(s: str) -> bool:
@@ -22,7 +32,7 @@ def validate_submitted_string(s: str) -> bool:
 
 @app.route('/user/<string:username>')
 def dynamic_page(username):
-    session.pop('error_message', None)
+    usernames.append(username)
     image_string, image = create_mosaic(username)
     session['image_path'] = file_saver(username=username, image=image)
     download_url = url_for('download_image', username=username)
