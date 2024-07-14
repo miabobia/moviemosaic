@@ -128,10 +128,14 @@ def scrape(user: str, month: int) -> list:
     def get_tmdb_id(item) -> int:
         return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
 
-    def title_to_image_path(path: str):
+    def remove_non_alphanum(s: str):
+        return re.sub(r'[^a-zA-Z0-9]', '', s)
+
+    def title_to_image_path(title: str):
+        # make sure we are only taking alphanumeric characters
+        title = remove_non_alphanum(title)
         images_dir = os.path.join(os.path.dirname(__file__), 'images/')
-        return f'{images_dir}/{path.replace(' ', '-')}.png'
-        # return images_dir + path.replace(' ', '-') + '.png'
+        return images_dir + title.replace(' ', '-') + '.png'
 
     # items = filter(has_watched_date, items)
     # # sorting movies by date
