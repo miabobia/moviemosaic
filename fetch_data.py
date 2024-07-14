@@ -130,7 +130,8 @@ def scrape(user: str, month: int) -> list:
 
     def title_to_image_path(path: str):
         images_dir = os.path.join(os.path.dirname(__file__), 'images/')
-        return images_dir + path.replace(' ', '-') + '.png'
+        return f'{images_dir}/{path.replace(' ', '-')}.png'
+        # return images_dir + path.replace(' ', '-') + '.png'
 
     # items = filter(has_watched_date, items)
     # # sorting movies by date
