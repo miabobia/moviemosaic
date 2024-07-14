@@ -1,5 +1,5 @@
 from datetime import datetime
-from fetch_data import scrape, rss_feed_exists
+from fetch_data import scrape, rss_feed_exists, valid_movies
 from time import time
 from file_management import file_cleanup, file_saver, serve_image, read_image
 from image_builder import build
@@ -10,6 +10,7 @@ import base64
 import secrets
 
 app = Flask(__name__)
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.secret_key = secrets.token_urlsafe(16)
 IMAGES_DIRECTORY = './images'
 
@@ -21,11 +22,13 @@ def validate_submitted_string(s: str) -> bool:
 
 @app.route('/user/<string:username>')
 def dynamic_page(username):
+    session.pop('error_message', None)
     image_string, image = create_mosaic(username)
     session['image_path'] = file_saver(username=username, image=image)
     download_url = url_for('download_image', username=username)
     # file_cleanup(filter_str=username)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
+
 
 
 @app.route('/download/<string:username>')
@@ -41,22 +44,37 @@ def download_image(username):
     else:
         return 'Image not found', 404
 
+@app.after_request
+def after_request(response):
+    session.pop('error_message', None)
+    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
+
 @app.route('/', methods=['GET', 'POST'])
 def main_form():
-    if request.method == 'POST':
-        submitted_string = request.form['username_submitted']
-        if validate_submitted_string(submitted_string):
-            return redirect(url_for('dynamic_page', username=submitted_string))
 
-        else:
-            error_message = 'Invalid submitted string'
-            return render_template('main_form.html', error_message=error_message)
-    return render_template('main_form.html')
+    if request.method == 'GET':
+        return render_template('main_form.html')
+    
+    submitted_username = request.form['username_submitted']
+    
+    if not validate_submitted_string(submitted_username):
+        return render_template('main_form.html', error_message='Invalid username')
+    
+    movie_items = valid_movies(submitted_username, datetime.now().month)
+    if not movie_items:
+        return render_template('main_form.html', error_message=f'No valid movies found for {submitted_username}')
+    return redirect(url_for('dynamic_page', username=submitted_username))
 
-def create_mosaic(username: str) -> str:
+
+def create_mosaic(username: str):
     # image_str is used for displaying image on webpage
     # image is raw data of image. Save it to local storage
     movie_cells = scrape(username, datetime.now().month)
+
+    if not movie_cells:
+        return None, None
+
     image = build(movie_cells, username, 'config.json')
     buffer = io.BytesIO()
     image.save(buffer, format='PNG')

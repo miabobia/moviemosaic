@@ -14,7 +14,6 @@ from moviecell import MovieCell
 import os
 
 async def download(name_url: tuple[str], session):
-    print(name_url)
     url = name_url[1]
     filename = name_url[0]
     async with session.get(url) as response:
@@ -35,10 +34,9 @@ def rss_feed_exists(username: str) -> bool:
     
     return not "<title>Letterboxd - Not Found</title>" in r.content.decode("utf-8")
 
-def scrape(user: str, month: int) -> list:
-    # maybe we split this up into two funcs
+def valid_movies(username: str, month: int):
 
-    url = f'https://letterboxd.com/{user}/rss/'
+    url = f'https://letterboxd.com/{username}/rss/'
     headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
     r = requests.get(url, headers=headers)
 
@@ -53,12 +51,63 @@ def scrape(user: str, month: int) -> list:
     items = soup.find_all('item')
 
     def is_movie(item) -> bool:
+        return  str(item.find('link')).find(f'https://letterboxd.com/{username}/list/') == -1 
+
+    def watched_this_month(item) -> bool:
+        return get_watched_date(item) == month
+    
+    def has_watched_date(item) -> bool:
+        watched_token = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
+        return watched_token != ['None']
+    
+    def get_watched_date(item) -> datetime:
+        date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
+        date = datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
+        # print(f'getwatched date returning: {date.month}')
+        return date.month
+    
+    items = list(filter(has_watched_date, items))
+
+    # print(f'ITEM AFTER HAS WATCH DATE:\n\n{items}\n\n')
+    # sorting movies by date
+    items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
+
+    # getting movies watched this month
+    items = list(filter(watched_this_month, items))
+
+    return items
+
+def scrape(user: str, month: int) -> list:
+    # maybe we split this up into two funcs
+
+    # url = f'https://letterboxd.com/{user}/rss/'
+    # headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+    # r = requests.get(url, headers=headers)
+
+    # # shouldn't need this anymore since it is called before scrape externally
+    # # if rss_feed_exists(r.content):
+    # #     raise Exception("ERROR: Username does not exist")
+    
+
+
+    # soup = BeautifulSoup(r.content, 'xml')
+
+    # items = soup.find_all('item')
+
+    def is_movie(item) -> bool:
         return  str(item.find('link')).find(f'https://letterboxd.com/{user}/list/') == -1 
 
     def watched_this_month(item) -> bool:
         return get_watched_date(item).month == month
+    
+    def has_watched_date(item) -> bool:
+        watched_token = item.find("letterboxd:watchedDate")
+        return watched_token != None
 
     def get_watched_date(item) -> datetime:
+        # print(item,end='\n\n')
+        splitter = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
+        # print(splitter,end='\n\n')
         date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
         date = datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
         return date
@@ -80,13 +129,16 @@ def scrape(user: str, month: int) -> list:
         return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
 
     def title_to_image_path(path: str):
-        images_dir = os.path.join(os.path.dirname(__file__), 'images')
+        images_dir = os.path.join(os.path.dirname(__file__), 'images/')
         return images_dir + path.replace(' ', '-') + '.png'
 
-    # sorting movies by date
-    items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
-    # getting movies watched this month
-    items = list(filter(watched_this_month, items))
+    # items = filter(has_watched_date, items)
+    # # sorting movies by date
+    # items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
+    # # getting movies watched this month
+    # items = list(filter(watched_this_month, items))
+
+    items = valid_movies(user, month)
 
     # reverse these? ^^    
     movie_titles = list(map(get_movie_title, items))
