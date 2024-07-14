@@ -16,13 +16,13 @@ app.secret_key = secrets.token_urlsafe(16)
 usernames = []
 IMAGES_DIRECTORY = './images'
 
-def file_cleaner():
-    # this is executed every ten minutes
-    file_cleanup()
+# def file_cleaner():
+#     # this is executed every ten minutes
+#     file_cleanup(usernames)
 
-scheduler = BackgroundScheduler()
-scheduler.add_job(file_cleaner, trigger='interval', minutes=10)
-scheduler.start()
+# scheduler = BackgroundScheduler()
+# scheduler.add_job(file_cleaner, trigger='interval', minutes=10)
+# scheduler.start()
 
 
 def validate_submitted_string(s: str) -> bool:
