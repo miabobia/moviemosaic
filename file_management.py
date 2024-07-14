@@ -14,14 +14,14 @@ def file_cleanup(filter_list: list=[]):
         return True
     
     if filter_list:
-        images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images/'))
+        images_dir = os.path.join(os.path.dirname(__file__), 'images/')
         files = list(filter(filter_images, glob(f'{images_dir}*.png')))
     
     for f in files:
         os.remove(f)
 
 def file_saver(username: str, image: "Image"='') -> str:
-    images_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), 'images/'))
+    images_dir = os.path.join(os.path.dirname(__file__), 'images/')
     file_name = f"{images_dir}/{username}_{uuid.uuid4()}.png"
     image.save(f"{file_name}")
     return file_name
