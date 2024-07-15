@@ -9,12 +9,13 @@ import io
 import base64
 import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
+from dotenv import load_dotenv
+import os
 
 app = Flask(__name__)
 app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 app.secret_key = secrets.token_urlsafe(16)
 usernames = []
-IMAGES_DIRECTORY = './images'
 
 # def file_cleaner():
 #     # this is executed every ten minutes
@@ -39,8 +40,6 @@ def dynamic_page(username):
     # file_cleanup(filter_str=username)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
-
-
 @app.route('/download/<string:username>')
 def download_image(username):
     image_path = session.get('image_path', None)
@@ -54,11 +53,12 @@ def download_image(username):
     else:
         return 'Image not found', 404
 
-@app.after_request
-def after_request(response):
-    session.pop('error_message', None)
-    response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
-    return response
+# FIGURE OUT SESSSIONS<>
+# @app.after_request
+# def after_request(response):
+#     session.pop('error_message', None)
+#     response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+#     return response
 
 @app.route('/', methods=['GET', 'POST'])
 def main_form():
@@ -93,4 +93,8 @@ def create_mosaic(username: str):
     return image_string, image
 
 if __name__ == "__main__":
+    if os.path.isfile('.env'):
+        load_dotenv('.env')
     app.run(host="0.0.0.0", port=8080, debug=True)
+
+# when i have post redirect using get

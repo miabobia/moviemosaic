@@ -5,23 +5,24 @@ from PIL import Image
 import io
 import base64
 
-def file_cleanup(filter_list: list=[]):
+def file_cleanup(filter_list: list):
 
     def filter_images(file_name) -> bool:
         for check_str in filter_list:
             if check_str in file_name:
                 return False
         return True
-    
-    if filter_list:
-        images_dir = os.path.join(os.path.dirname(__file__), 'images/')
-        files = list(filter(filter_images, glob(f'{images_dir}*.png')))
+
+    images_dir = os.environ['IMAGES_DIR']
+    # images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+    files = list(filter(filter_images, glob(f'{images_dir}*.png')))
     
     for f in files:
         os.remove(f)
 
 def file_saver(username: str, image: "Image"='') -> str:
-    images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+    # images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+    images_dir = os.environ['IMAGES_DIR']
     file_name = f"{images_dir}/{username}_{uuid.uuid4()}.png"
     image.save(f"{file_name}")
     return file_name

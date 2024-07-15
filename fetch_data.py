@@ -137,7 +137,7 @@ def scrape(user: str, month: int) -> list:
 
         title = remove_non_alphanum(title)
 
-        images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+        images_dir = os.environ['IMAGES_DIR']
         return images_dir + title.replace(' ', '-') + '.png'
 
     # items = filter(has_watched_date, items)
