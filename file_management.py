@@ -22,6 +22,7 @@ def file_cleanup(filter_list: list):
 
 def file_saver(username: str, image: "Image"='') -> str:
     # images_dir = os.path.join(os.path.dirname(__file__), 'images/')
+    print('hello world')
     images_dir = os.environ['IMAGES_DIR']
     file_name = f"{images_dir}/{username}_{uuid.uuid4()}.png"
     image.save(f"{file_name}")
