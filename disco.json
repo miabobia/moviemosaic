@@ -3,7 +3,6 @@
     "services": {
         "web": {
             "port": 8080,
-            "command": "./bin/serve.sh",
             "volumes":[{
                 "name": "images",
                 "destinationPath": "/images"
