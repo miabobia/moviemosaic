@@ -4,6 +4,7 @@ APScheduler==3.10.4
 beautifulsoup4==4.12.3
 Flask==3.0.3
 Pillow==10.4.0
+python-dotenv==1.0.1
 Requests==2.32.3
 tmdbsimple==2.9.1
 blinker==1.7.0
