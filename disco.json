@@ -2,13 +2,7 @@
     "version": "1.0",
     "services": {
         "web": {
-            "port": 8080,
-            "volumes": [
-                {
-                    "name": "images",
-                    "desinationPath": "/images"
-                }
-            ]
+            "port": 8080
         }
     }
 }
