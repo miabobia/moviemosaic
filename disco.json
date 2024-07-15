@@ -6,7 +6,7 @@
             "command": "./bin/serve.sh",
             "volumes":[{
                 "name": "images",
-                "desinationPath": "/images"
+                "destinationPath": "/images"
         }]
         }
     }
