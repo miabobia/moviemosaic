@@ -19,6 +19,11 @@ def resize_image(im: Image, w_factor: float, h_factor: float) -> Image:
 	new_size = (int(im.size[0] * w_factor), int(im.size[1] * h_factor))
 	return im.resize(size=new_size)
 
+# going to implement this because posters can have different dimensions/aspect ratios.
+# find out what usual size is for most thumbnails then just force all images to be same size
+# def resize_image(im: Image, size: tuple) -> Image:
+#     return im.resize(size=size)
+
 def build_thumbnail(cell: "MovieCell", resize_factor: float) -> Image:
 	return resize_image(Image.open(cell.im_path), resize_factor, resize_factor)
 
