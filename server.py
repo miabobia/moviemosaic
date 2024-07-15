@@ -9,7 +9,7 @@ import io
 import base64
 import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 
 app = Flask(__name__)
@@ -93,8 +93,8 @@ def create_mosaic(username: str):
     return image_string, image
 
 if __name__ == "__main__":
-    if os.path.isfile('.env'):
-        load_dotenv('.env')
+    # if os.path.isfile('.env'):
+    #     load_dotenv('.env')
     app.run(host="0.0.0.0", port=8080, debug=True)
 
 # when i have post redirect using get
