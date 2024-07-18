@@ -50,11 +50,13 @@ def download_image(username):
     # image = read_image(image_path)
     image_string = session.get('image_string', None)
     if image_string:
+        image_data = base64.b64decode(image_string)
+        buffer = io.BytesIO(image_data)
         buffer = io.BytesIO()
         # image_string.save(buffer, format='PNG')
         buffer.seek(0)
         # file_cleanup()
-        return send_file(image_string, as_attachment=True, download_name=f'{username}.png', mimetype='image/png')
+        return send_file(buffer, as_attachment=True, download_name=f'{username}.png', mimetype='image/png/')
     else:
         return 'Image not found', 404
 
