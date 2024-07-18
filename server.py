@@ -58,6 +58,8 @@ def download_image(username):
         # file_cleanup()
         return send_file(buffer, as_attachment=True, download_name=f'{username}.png', mimetype='image/png/')
     else:
+        # generate image here if people want to directly dl image without visiting site?
+        # redirect to dynamic page?
         return 'Image not found', 404
 
 # FIGURE OUT SESSSIONS<>

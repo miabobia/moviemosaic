@@ -1,5 +1,6 @@
 """
-eventually API calls will be in place here to extract data
+Fetch Data from rss feed then transform data into MovieClass objects.
+Maybe we split this up into a fetch_data.py and a transform_data.py?
 """
 
 from bs4 import BeautifulSoup
@@ -16,6 +17,12 @@ import os
 async def download(name_url: tuple[str], session):
     url = name_url[1]
     filename = name_url[0]
+
+    # put in shared cache object here
+    # it will check if 'filename' already exists
+    # if it does then just return no further action needed
+    # else call function regularly
+
     async with session.get(url) as response:
         async with aiofiles.open(filename, "wb") as f:
             await f.write(await response.read())
@@ -148,7 +155,6 @@ def scrape(user: str, month: int) -> list:
 
     items = valid_movies(user, month)
 
-    # reverse these? ^^    
     movie_titles = list(map(get_movie_title, items))
     movie_ratings = list(map(get_movie_rating, items))
     movie_directors = list(map(get_director, map(get_tmdb_id, items)))
@@ -160,3 +166,112 @@ def scrape(user: str, month: int) -> list:
     # bundling up movies as dataclass now
 
     return [MovieCell(*movie_data) for movie_data in zip(movie_titles, movie_directors, movie_ratings, movie_poster_paths)]
+
+class MovieCellBuilder:
+    _username: str
+    _mode: int
+    _scraper: Scraper
+    _transformer: Transformer
+
+    # order of operations is way off here. Program will crash if rss feed isn't valid and transformer created
+    def __init__(self, username: str, mode: int, month=0) -> None:
+        self._scraper = Scraper(username=username)
+        self._transformer = Transformer(username=username, mode=mode, month=month, feed_content=self._scraper.get_rss_feed())
+
+    def valid_username(self) -> tuple(bool, str):
+        if not self._scraper.valid_rss_feed():
+            return False, f"{self._username} has no rss feed (most likely no letterboxd account)"
+        if not self._transformer.valid_movies():
+            # change message based on self._mode ??
+            return False, f"{self._username} has no valid movies according to the criteria"
+
+        return True, f'{self._username} is valid'
+
+    def build_cells(self) -> list[MovieCell]:
+        pass
+
+# going to make this into a class to avoid duplicate calls because front-end makes calls here to determine if user valid
+# every instance of Scraper needs to be tied to a server-side session
+class Scraper:
+    '''
+    Scrape data from rss feed and return content.
+    Can also check for invalid rss feed. 
+    '''
+    _rss_feed: bytes
+    _username: str
+
+    
+    def __init__(self, username: str) -> None:
+        self._username = username
+        if mode == 'MONTH':
+            self._mode = 0
+        elif mode == 'MOST_RECENT':
+            self._mode = 1
+
+    def load_rss_feed(self) -> None:
+        url = f'https://letterboxd.com/{self._username}/rss/'
+        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36'}
+        r = requests.get(url, headers=headers)
+        self._rss_feed = r.content
+    
+    def valid_rss_feed(self) -> bool:
+        if not self.rss_feed:
+            self.load_rss_feed()
+        return "<title>Letterboxd - Not Found</title>" in self._rss_feed.decode("utf-8")
+
+    def get_rss_feed(self) -> bytes:
+        return self._rss_feed
+
+class Transformer:
+    '''
+    Takes data from rss feed and transforms into usable state for building MovieCell objects.
+    '''
+    _username: str
+    _mode: int
+    _month: int
+    _movies: list[str]
+
+    def __init__(self, username: str, mode: int, month: int, feed_content: bytes):
+        self._username = username
+        self._mode = mode
+        self._month = month
+        self._movies = self.load_valid_movies(self.load_items(feed_content))
+
+    def get_items(self, feed_content: bytes) -> list[str]:
+        soup = BeautifulSoup(feed_content, 'xml')
+        return soup.find_all('item')
+
+    def load_valid_movies(self):
+        def is_movie(item) -> bool:
+            return  str(item.find('link')).find(f'https://letterboxd.com/{self._username}/list/') == -1 
+
+        def watched_this_month(item) -> bool:
+            return get_watched_date(item) == self._month
+        
+        def has_watched_date(item) -> bool:
+            watched_token = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
+            return watched_token != ['None']
+        
+        def get_watched_date(item) -> datetime:
+            date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
+            date = datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
+            # print(f'getwatched date returning: {date.month}')
+            return date.month
+
+        # ensure item has watched date field
+        items = list(filter(has_watched_date, self.get_items()))
+
+        # sorting movies by date
+        items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
+
+        if self._mode == 0:
+            # getting movies watched this month
+            items = list(filter(watched_this_month, items))
+        elif self._mode == 1:
+            # getting last 30 movies (change 30 to config.json val?)
+            items = list(items)[:30]
+
+        return items
+
+    def valid_movies_exist(self) -> bool:
+        return len(self._movies)
