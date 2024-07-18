@@ -22,6 +22,7 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
         - only check head for expiry. 
         - when head expires we switch head -> head.next
 - add caching for movie posters
+    - how does caching process talk to flask app? (multiprocessing?, disco.json background worker?)
     - set size of posters allowed to be stored locally
     - use deque to store image paths allowing us to quickly appendleft and pop
     - use set to store image paths allowing quick lookups to avoid duplicates

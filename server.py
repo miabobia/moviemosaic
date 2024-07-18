@@ -11,10 +11,13 @@ import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
 from dotenv import load_dotenv
 import os
+from flask_session import Session
 
 app = Flask(__name__)
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.config["SESSION_PERMANENT"] = False
+app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
+Session(app)
 usernames = []
 
 # def file_cleaner():
@@ -35,18 +38,20 @@ def validate_submitted_string(s: str) -> bool:
 def dynamic_page(username):
     usernames.append(username)
     image_string, image = create_mosaic(username)
-    session['image_path'] = file_saver(username=username, image=image)
+    # session['image_path'] = file_saver(username=username, image=image)
+    session['image_string'] = image_string
     download_url = url_for('download_image', username=username)
     # file_cleanup(filter_str=username)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
 @app.route('/download/<string:username>')
 def download_image(username):
-    image_path = session.get('image_path', None)
-    image = read_image(image_path)
-    if image:
+    # image_path = session.get('image_path', None)
+    # image = read_image(image_path)
+    image_string = session.get('image_string', None)
+    if image_string:
         buffer = io.BytesIO()
-        image.save(buffer, format='PNG')
+        image_string.save(buffer, format='PNG')
         buffer.seek(0)
         # file_cleanup()
         return send_file(buffer, as_attachment=True, download_name=f'{username}.png', mimetype='image/png')
