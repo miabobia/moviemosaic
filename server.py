@@ -52,7 +52,7 @@ def download_image(username):
     if image_string:
         image_data = base64.b64decode(image_string)
         buffer = io.BytesIO(image_data)
-        buffer = io.BytesIO()
+        # buffer = io.BytesIO()
         # image_string.save(buffer, format='PNG')
         buffer.seek(0)
         # file_cleanup()
