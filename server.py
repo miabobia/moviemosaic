@@ -39,7 +39,7 @@ def dynamic_page(username):
     usernames.append(username)
     image_string, image = create_mosaic(username)
     # session['image_path'] = file_saver(username=username, image=image)
-    session['image_string'] = image_string
+    session[f'{username}_image_string'] = image_string
     download_url = url_for('download_image', username=username)
     # file_cleanup(filter_str=username)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
@@ -48,7 +48,7 @@ def dynamic_page(username):
 def download_image(username):
     # image_path = session.get('image_path', None)
     # image = read_image(image_path)
-    image_string = session.get('image_string', None)
+    image_string = session.get(f'{username}_image_string', None)
     if image_string:
         image_data = base64.b64decode(image_string)
         buffer = io.BytesIO(image_data)
