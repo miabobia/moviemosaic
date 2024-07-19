@@ -75,12 +75,14 @@ def main_form():
         return render_template('main_form.html')
     
     submitted_username = request.form['username_submitted']
-
-    session[f'{submitted_username}_MovieCellBuilder'] = MovieCellBuilder(
+    movie_cell_builder = MovieCellBuilder(
         username=submitted_username,
         mode=0,
         month=datetime.now().month
     )
+
+    session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
+
     mv_builder = session.get(f'{submitted_username}_MovieCellBuilder', None)
     valid_username, error = mv_builder.valid_username()
     
@@ -97,7 +99,14 @@ def main_form():
 
 
 def create_mosaic(username: str):
-    mv_builder = session.get(f'{username}_MovieCellBuilder', None)
+    mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
+
+    mv_builder = MovieCellBuilder(
+        username=mv_builder_dict['_username'],
+        mode=mv_builder_dict['_mode'],
+        month=mv_builder_dict['_month']
+    )
+
     movie_cells = mv_builder.build_cells()
 
 
