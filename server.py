@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
 from datetime import datetime
-from fetch_data import scrape, rss_feed_exists, valid_movies, MovieCellBuilder
+from fetch_data import scrape, rss_feed_exists, valid_movies, MovieCellBuilder, Scraper, Transformer
 from image_builder import build
 from ratio_tester import get_moviecells
 from flask import Flask, redirect, url_for, request, session, send_file, render_template
@@ -99,14 +99,15 @@ def main_form():
 
 
 def create_mosaic(username: str):
-    mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
+    # mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
 
-    mv_builder = MovieCellBuilder(
-        username=mv_builder_dict['_username'],
-        mode=mv_builder_dict['_mode'],
-        month=mv_builder_dict['_month']
-    )
+    # mv_builder = MovieCellBuilder(
+    #     username=mv_builder_dict['_username'],
+    #     mode=mv_builder_dict['_mode'],
+    #     month=mv_builder_dict['_month']
+    # )
 
+    mv_builder = rebuild_movie_builder(username=username)
     movie_cells = mv_builder.build_cells()
 
 
@@ -125,6 +126,28 @@ def create_mosaic(username: str):
     image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
     return image_string, image
 
+def rebuild_movie_builder(username: str) -> MovieCellBuilder:
+    mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
+
+    if not mv_builder_dict:
+        return None
+    
+    if not '_scraper' in mv_builder_dict:
+        return None
+    
+    if not '_transformer' in mv_builder_dict:
+        return None
+    
+    builder = MovieCellBuilder(
+        username=mv_builder_dict['_username'],
+        mode=mv_builder_dict['_mode'],
+        month=mv_builder_dict['_month']
+    )
+
+    builder._scraper = Scraper.from_dict(mv_builder_dict['_scraper'])
+    builder._transformer = Transformer.from_dict(mv_builder_dict['_transformer'])
+
+    return builder
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
 

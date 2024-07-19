@@ -395,3 +395,5 @@ class MovieCellBuilder:
             "_scraper": self._scraper.to_dict(),  # Convert Scraper instance to dictionary
             "_transformer": self._transformer.to_dict()  # Convert Transformer instance to dictionary
         }
+    
+    
