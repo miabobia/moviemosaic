@@ -284,47 +284,6 @@ class Transformer:
 
         return list(map(get_poster_url, self._movies))
 
-    def scrape(self, user: str, month: int) -> list:
-
-        def get_movie_title(item) -> str:
-            return re.split(pattern='<|>', string=str(item.find("letterboxd:filmTitle")))[2]
-
-        def get_movie_rating(item) -> int:
-            rating_tag = item.find("letterboxd:memberRating")
-            if not rating_tag: return -1
-            return float(re.split(pattern='<|>', string=str(rating_tag))[2])
-
-        def get_poster_url(item) -> str:
-            # attrs are broken inside description tag so we have to do this a little more manually
-            url_slice = [m.start() for m in re.finditer('"', str(item.find('description')))]
-            return str(item.find('description'))[url_slice[0]+1:url_slice[1]]
-
-        def get_tmdb_id(item) -> int:
-            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
-
-        def remove_non_alphanum(s: str):
-            return re.sub(r'[^a-zA-Z0-9]', '', s)
-
-        def title_to_image_path(title: str):
-            # make sure we are only taking alphanumeric characters
-            title = remove_non_alphanum(title)
-            images_dir = os.environ['IMAGES_DIR']
-            return images_dir + '/' + title.replace(' ', '-') + '.png'
-
-        items = valid_movies(user, month)
-
-        movie_titles = list(map(get_movie_title, items))
-        movie_ratings = list(map(get_movie_rating, items))
-        movie_directors = list(map(get_director, map(get_tmdb_id, items)))
-        movie_poster_paths = list(map(title_to_image_path, movie_titles))
-
-        # download posters
-        asyncio.run(download_all(zip(movie_poster_paths, map(get_poster_url, items))))
-        
-        # bundling up movies as dataclass now
-
-        return [MovieCell(*movie_data) for movie_data in zip(movie_titles, movie_directors, movie_ratings, movie_poster_paths)]
-
     def valid_movies_exist(self) -> bool:
         return len(self._movies)
 
