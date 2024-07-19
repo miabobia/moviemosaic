@@ -80,11 +80,11 @@ def main_form():
         mode=0,
         month=datetime.now().month
     )
+    valid_username, error = movie_cell_builder.valid_username()
 
     session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
 
-    mv_builder = rebuild_movie_builder(submitted_username)
-    valid_username, error = mv_builder.valid_username()
+    # mv_builder = rebuild_movie_builder(submitted_username)
     
     if not valid_username:
         return render_template('main_form.html', error_message=error)
