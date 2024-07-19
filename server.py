@@ -135,7 +135,7 @@ def rebuild_movie_builder(username: str) -> MovieCellBuilder:
             mode=0,
             month=datetime.now().month
         )
-        session[f'{username}_MovieCellBuilder'] = movie_cell_builder
+        session[f'{username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
         return movie_cell_builder
     
     # if not '_scraper' in mv_builder_dict:
