@@ -392,7 +392,6 @@ class MovieCellBuilder:
     def to_dict(self) -> dict:
         return {
             "_username": self._username,
-            "_mode": self._mode,
             "_scraper": self._scraper.to_dict(),  # Convert Scraper instance to dictionary
             "_transformer": self._transformer.to_dict()  # Convert Transformer instance to dictionary
         }
