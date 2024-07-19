@@ -356,8 +356,7 @@ class MovieCellBuilder:
         self._mode = mode
         self._month = month
         self._username = username
-
-        if not scraper or not transformer:
+        if scraper == None:
             self._scraper = Scraper(username=username)
             self._transformer = Transformer(username=username, mode=self._mode, month=month, feed_content=self._scraper.get_rss_feed())
             if self._scraper.valid_rss_feed():
