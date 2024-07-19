@@ -185,6 +185,13 @@ class Scraper:
             '_rss_feed': self._rss_feed.decode('utf-8'),
             '_username': self._username
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            username=data['_username'],
+            rss_feed=data['_rss_feed']
+        )
 
 class Transformer:
     '''
@@ -330,6 +337,16 @@ class Transformer:
             "_movies": self._movies,
             "_feed_content": self._feed_content
         }
+    
+    @classmethod
+    def from_dict(cls, data):
+        return cls(
+            username=data['_username'],
+            mode=data['_mode'],
+            month=data['_month'],
+            movies=data['_movies'],
+            feed_content=data['_feed_content']
+        )
 
 class MovieCellBuilder:
     _username: str
