@@ -179,6 +179,12 @@ class Scraper:
         # if not self._rss_feed:
         #     self.load_rss_feed()
         return self._rss_feed
+    
+    def to_dict(self):
+        return {
+            '_rss_feed': self._rss_feed.decode('utf-8'),
+            '_username': self._username
+        }
 
 class Transformer:
     '''
@@ -313,9 +319,17 @@ class Transformer:
 
         return [MovieCell(*movie_data) for movie_data in zip(movie_titles, movie_directors, movie_ratings, movie_poster_paths)]
 
-
     def valid_movies_exist(self) -> bool:
         return len(self._movies)
+
+    def to_dict(self):
+        return {
+            "_username": self._username,
+            "_mode": self._mode,
+            "_month": self._month,
+            "_movies": self._movies,
+            "_feed_content": self._feed_content
+        }
 
 class MovieCellBuilder:
     _username: str
@@ -357,3 +371,11 @@ class MovieCellBuilder:
                 movie_poster_paths
             )
         ]
+
+    def to_dict(self) -> dict:
+        return {
+            "_username": self._username,
+            "_mode": self._mode,
+            "_scraper": self._scraper.to_dict(),  # Convert Scraper instance to dictionary
+            "_transformer": self._transformer.to_dict()  # Convert Transformer instance to dictionary
+        }
