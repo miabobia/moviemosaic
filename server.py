@@ -83,7 +83,7 @@ def main_form():
 
     session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
 
-    mv_builder = session.get(f'{submitted_username}_MovieCellBuilder', None)
+    mv_builder = rebuild_movie_builder(submitted_username)
     valid_username, error = mv_builder.valid_username()
     
     if not valid_username:
