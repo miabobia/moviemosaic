@@ -132,11 +132,11 @@ def rebuild_movie_builder(username: str) -> MovieCellBuilder:
     if not mv_builder_dict:
         return None
     
-    if not '_scraper' in mv_builder_dict:
-        return None
+    # if not '_scraper' in mv_builder_dict:
+    #     return None
     
-    if not '_transformer' in mv_builder_dict:
-        return None
+    # if not '_transformer' in mv_builder_dict:
+    #     return None
     
     builder = MovieCellBuilder(
         username=mv_builder_dict['_username'],
