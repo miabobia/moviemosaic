@@ -130,7 +130,13 @@ def rebuild_movie_builder(username: str) -> MovieCellBuilder:
     mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
 
     if not mv_builder_dict:
-        return None
+        movie_cell_builder = MovieCellBuilder(
+            username=username,
+            mode=0,
+            month=datetime.now().month
+        )
+        session[f'{username}_MovieCellBuilder'] = movie_cell_builder
+        return movie_cell_builder
     
     # if not '_scraper' in mv_builder_dict:
     #     return None

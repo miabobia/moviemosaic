@@ -19,6 +19,4 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
     - i wrote cache.py as an LRU cache with deque and set. Need to make instance of it and share between server.py and a worker process for proper caching
 - more options for what movies can be retrieved?
     - add option to fetch last 30 (50 is max) movies from rss
-
-- improve efficiency of error checking. Currently duplicate calls are being made to rss feed to determine if provided username is valid
-    - make scraping class so we can store rss feed when first check happens
+- make images resize to standard size
