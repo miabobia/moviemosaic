@@ -189,8 +189,7 @@ class Scraper:
     @classmethod
     def from_dict(cls, data):
         return cls(
-            username=data['_username'],
-            rss_feed=data['_rss_feed']
+            username=data['_username']
         )
 
 class Transformer:
