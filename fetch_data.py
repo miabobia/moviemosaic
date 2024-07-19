@@ -333,7 +333,6 @@ class Transformer:
             "_username": self._username,
             "_mode": self._mode,
             "_month": self._month,
-            "_movies": self._movies,
             "_feed_content": self._feed_content
         }
     
