@@ -352,14 +352,16 @@ class MovieCellBuilder:
     _transformer: Transformer
     _month: int
 
-    def __init__(self, username: str, mode: int, month: int = 0) -> None:
+    def __init__(self, username: str, mode: int, month: int = 0, scraper: Scraper = None, transformer: Transformer = None) -> None:
         self._mode = mode
         self._month = month
         self._username = username
-        self._scraper = Scraper(username=username)
-        self._transformer = Transformer(username=username, mode=self._mode, month=month, feed_content=self._scraper.get_rss_feed())
-        if self._scraper.valid_rss_feed():
-            self._transformer.load_movies()
+
+        if not scraper or not transformer:
+            self._scraper = Scraper(username=username)
+            self._transformer = Transformer(username=username, mode=self._mode, month=month, feed_content=self._scraper.get_rss_feed())
+            if self._scraper.valid_rss_feed():
+                self._transformer.load_movies()
 
     def valid_username(self) -> tuple[bool, str]:
         if not self._scraper.valid_rss_feed():

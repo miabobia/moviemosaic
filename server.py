@@ -141,11 +141,13 @@ def rebuild_movie_builder(username: str) -> MovieCellBuilder:
     builder = MovieCellBuilder(
         username=mv_builder_dict['_username'],
         mode=mv_builder_dict['_mode'],
-        month=mv_builder_dict['_month']
+        month=mv_builder_dict['_month'],
+        scraper=Scraper.from_dict(mv_builder_dict['_scraper']),
+        transformer=Transformer.from_dict(mv_builder_dict['_transformer'])
     )
 
-    builder._scraper = Scraper.from_dict(mv_builder_dict['_scraper'])
-    builder._transformer = Transformer.from_dict(mv_builder_dict['_transformer'])
+    # builder._scraper = Scraper.from_dict(mv_builder_dict['_scraper'])
+    # builder._transformer = Transformer.from_dict(mv_builder_dict['_transformer'])
 
     return builder
 if __name__ == "__main__":
