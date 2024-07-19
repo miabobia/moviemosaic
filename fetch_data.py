@@ -355,9 +355,10 @@ class MovieCellBuilder:
     _transformer: Transformer
 
     def __init__(self, username: str, mode: int, month: int = 0) -> None:
+        self._mode = mode
         self._username = username
         self._scraper = Scraper(username=username)
-        self._transformer = Transformer(username=username, mode=mode, month=month, feed_content=self._scraper.get_rss_feed())
+        self._transformer = Transformer(username=username, mode=self._mode, month=month, feed_content=self._scraper.get_rss_feed())
         if self._scraper.valid_rss_feed():
             self._transformer.load_movies()
 
@@ -393,7 +394,7 @@ class MovieCellBuilder:
         return {
             "_username": self._username,
             "_scraper": self._scraper.to_dict(),  # Convert Scraper instance to dictionary
-            "_transformer": self._transformer.to_dict()  # Convert Transformer instance to dictionary
+            "_transformer": self._transformer.to_dict(),  # Convert Transformer instance to dictionary
+            "_mode": self._mode
         }
-    
     
