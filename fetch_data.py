@@ -342,7 +342,6 @@ class Transformer:
             username=data['_username'],
             mode=data['_mode'],
             month=data['_month'],
-            movies=data['_movies'],
             feed_content=data['_feed_content']
         )
 
