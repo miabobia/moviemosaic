@@ -1,7 +1,9 @@
+import os
+from dotenv import load_dotenv
+if os.path.isfile('.env'):
+    load_dotenv('.env')
 from datetime import datetime
-from fetch_data import scrape, rss_feed_exists, valid_movies
-from time import time
-from file_management import file_cleanup, file_saver, serve_image, read_image
+from fetch_data import scrape, rss_feed_exists, valid_movies, MovieCellBuilder
 from image_builder import build
 from ratio_tester import get_moviecells
 from flask import Flask, redirect, url_for, request, session, send_file, render_template
@@ -9,8 +11,6 @@ import io
 import base64
 import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
-from dotenv import load_dotenv
-import os
 from flask_session import Session
 
 app = Flask(__name__)
@@ -75,23 +75,39 @@ def main_form():
         return render_template('main_form.html')
     
     submitted_username = request.form['username_submitted']
+
+    session[f'{submitted_username}_MovieCellBuilder'] = MovieCellBuilder(
+        username=submitted_username,
+        mode=0,
+        month=datetime.now().month
+    )
+    mv_builder = session.get(f'{submitted_username}_MovieCellBuilder', None)
+    valid_username, error = mv_builder.valid_username()
     
-    if not validate_submitted_string(submitted_username):
-        return render_template('main_form.html', error_message='Invalid username')
+    if not valid_username:
+        return render_template('main_form.html', error_message=error)
+
+    # if not validate_submitted_string(submitted_username):
+    #     return render_template('main_form.html', error_message='Invalid username')
     
-    movie_items = valid_movies(submitted_username, datetime.now().month)
-    if not movie_items:
-        return render_template('main_form.html', error_message=f'No valid movies found for {submitted_username}')
+    # movie_items = valid_movies(submitted_username, datetime.now().month)
+    # if not movie_items:
+    #     return render_template('main_form.html', error_message=f'No valid movies found for {submitted_username}')
     return redirect(url_for('dynamic_page', username=submitted_username))
 
 
 def create_mosaic(username: str):
+    mv_builder = session.get(f'{username}_MovieCellBuilder', None)
+    movie_cells = mv_builder.build_cells()
+
+
+
     # image_str is used for displaying image on webpage
     # image is raw data of image. Save it to local storage
-    movie_cells = scrape(username, datetime.now().month)
+    # movie_cells = scrape(username, datetime.now().month)
 
-    if not movie_cells:
-        return None, None
+    # if not movie_cells:
+    #     return None, None
 
     image = build(movie_cells, username, 'config.json')
     buffer = io.BytesIO()
@@ -101,9 +117,6 @@ def create_mosaic(username: str):
     return image_string, image
 
 if __name__ == "__main__":
-    if os.path.isfile('.env'):
-        load_dotenv('.env')
-    print(os.environ)
     app.run(host="0.0.0.0", port=8080, debug=True)
 
 # when i have post redirect using get
