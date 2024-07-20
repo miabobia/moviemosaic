@@ -299,10 +299,8 @@ class MovieCellBuilder:
             # class has been rehydrated and it has no good data
             self._status = status
             self._movie_data = movie_data
-            print(f'rehydrated class with status!')
             return
-        else:
-            print(f'NOT REHYDRATING FUCK OFF {status}')
+
         
         if movie_data:
             # class has been rehydrated but data is good to go already
@@ -334,7 +332,6 @@ class MovieCellBuilder:
         # set status so we know data is good
         self._status = (True, f'movie data for {self._username} good')
 
-        print(f'\nself._movie_data = {len(self._movie_data)}\n\nstatus: {self._status}')
 
     def get_status(self) -> tuple[bool, str]:
         return self._status

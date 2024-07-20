@@ -30,11 +30,9 @@ def dynamic_page(username: str):
     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
     movie_cell_builder: MovieCellBuilder
     if not movie_cell_builder_dict:
-        print(f'{username}: loading dynamic page have nothing in session')
         # this means user went directly to this page instead of through homepage
         movie_cell_builder = create_movie_cell_builder(username=username)
     else:
-        print(f'{username}: loading dynamic page have something in session')
         movie_cell_builder = rebuild_movie_cell_builder(username=username)
 
     # movie_cell_builder exists now
@@ -61,11 +59,9 @@ def download_image(username: str):
     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
     movie_cell_builder: MovieCellBuilder
     if not movie_cell_builder_dict:
-        print(f'{username}: loading dynamic page have nothing in session')
         # this means user went directly to this page instead of through homepage
         movie_cell_builder = create_movie_cell_builder(username=username)
     else:
-        print(f'{username}: loading dynamic page have something in session')
         movie_cell_builder = rebuild_movie_cell_builder(username=username)
 
     # movie_cell_builder exists now
@@ -142,17 +138,12 @@ def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
     '''
     mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
 
-    print(f' WHATSI NTHE DICT: ?? {mv_builder_dict['_status']}')
-
     builder = MovieCellBuilder(
         username=mv_builder_dict['_username'],
         mode=mv_builder_dict['_mode'],
         status=mv_builder_dict['_status'],
         movie_data=mv_builder_dict['_movie_data']
     )
-
-    print(f'REBUILDING {builder._status}')
-
     return builder
 
 if __name__ == "__main__":
