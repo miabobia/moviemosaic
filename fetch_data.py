@@ -161,6 +161,7 @@ class Scraper:
 
     
     def __init__(self, username: str) -> None:
+        print('scraper created!')
         self._username = username
         self.load_rss_feed()
 
@@ -171,26 +172,10 @@ class Scraper:
         self._rss_feed = r.content
     
     def valid_rss_feed(self) -> bool:
-        # if not self._rss_feed:
-        #     self.load_rss_feed()
         return not "<title>Letterboxd - Not Found</title>" in self._rss_feed.decode("utf-8")
 
     def get_rss_feed(self) -> bytes:
-        # if not self._rss_feed:
-        #     self.load_rss_feed()
         return self._rss_feed
-    
-    def to_dict(self):
-        return {
-            '_rss_feed': self._rss_feed.decode('utf-8'),
-            '_username': self._username
-        }
-    
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            username=data['_username']
-        )
 
 class Transformer:
     '''
@@ -207,6 +192,7 @@ class Transformer:
         self._mode = mode
         self._month = month
         self._feed_content = feed_content
+        print('transformer created!')
     
     def load_movies(self) -> None:
         self._movies = self.get_valid_movies()
@@ -287,80 +273,87 @@ class Transformer:
     def valid_movies_exist(self) -> bool:
         return len(self._movies)
 
-    def to_dict(self):
-        return {
-            "_username": self._username,
-            "_mode": self._mode,
-            "_month": self._month,
-            "_feed_content": self._feed_content
-        }
-    
-    @classmethod
-    def from_dict(cls, data):
-        return cls(
-            username=data['_username'],
-            mode=data['_mode'],
-            month=data['_month'],
-            feed_content=data['_feed_content']
-        )
+'''
+==MCB=CLASS==
+GOAL: persist data from user per session
+
+1. MCB is built
+    a) rss_feed is built
+    b) status is set T-> rss_feed exists F-> rss_feed not exists
+    c) if status then we use Transformer funcs to build data
+    d) if not status then no calls are made to transformer
+
+'''
 
 class MovieCellBuilder:
     _username: str
-    _mode: int
-    _scraper: Scraper
-    _transformer: Transformer
-    _month: int
+    _movie_data: list
+    _status: tuple[bool, str]
 
-    def __init__(self, username: str, mode: int, month: int = 0, scraper: Scraper = None, transformer: Transformer = None) -> None:
-        self._mode = mode
-        self._month = month
+    def __init__(self, username: str, mode: int, status: tuple[bool, str] = None, movie_data: list = None) -> None:
+
         self._username = username
+        self._mode = mode
 
-        self._scraper = Scraper(username=username)
-        self._transformer = Transformer(username=username, mode=self._mode, month=month, feed_content=self._scraper.get_rss_feed())
-        if self._scraper.valid_rss_feed():
-            self._transformer.load_movies()
+        if status and not status[0]:
+            # class has been rehydrated and it has no good data
+            self._status = status
+            return
+        
+        if movie_data:
+            # class has been rehydrated but data is good to go already
+            self._movie_data = movie_data
+            return
 
-        if scraper:
-            self._scraper = scraper
-            self._transformer = transformer
-            if self._scraper.valid_rss_feed():
-                self._transformer.load_movies()
+        # attempt to scrape data and set status to false is no data to scrape
+        scraper = Scraper(username=username)
+        if not scraper.valid_rss_feed():
+            self._status = (False, f'{self._username} has no rss feed (most likely no letterboxd account)')
+            return
 
-    def valid_username(self) -> tuple[bool, str]:
-        if not self._scraper.valid_rss_feed():
-            return False, f"{self._username} has no rss feed (most likely no letterboxd account)"
-        if not self._transformer.get_valid_movies():
-            # change message based on self._mode ??t
-            return False, f"{self._username} has no valid movies according to the criteria"
+        # attempt to transform scraped data and set status to false if data not viable
+        transformer = Transformer(username=username, mode=self._mode, month=datetime.now().month, feed_content=scraper.get_rss_feed())
+        transformer.load_movies()
+        if not transformer.valid_movies_exist():
+            self._status = (False, f'{self._username} has no valid movies according to the criteria')
+            return
 
-        return True, f'{self._username} is valid'
+        # transform good data and store
+        self._movie_data = [
+            transformer.get_movie_titles(),       # 0
+            transformer.get_movie_directors(),    # 1
+            transformer.get_movie_ratings(),      # 2
+            transformer.get_movie_poster_paths(), # 3
+            transformer.get_movie_poster_urls()   # 4
+        ]
+
+        # set status so we know data is good
+        self._status = (True, f'movie data for {self._username} good')
+
+        print(f'\nself._movie_data = {self._movie_data}\n\nstatus: {self._status}')
+
+    def get_status(self) -> tuple[bool, str]:
+        return self._status
 
     def build_cells(self) -> list[MovieCell]:
-
-        # make this into variable instead of calling twice
-        movie_poster_paths = self._transformer.get_movie_poster_paths()
-
         # download posters
-        asyncio.run(download_all(zip(movie_poster_paths, self._transformer.get_movie_poster_urls())))
+        asyncio.run(download_all(zip(self._movie_data[3], self._movie_data[4])))
 
         # collect all needed components of MovieCell from self._transformer
         return [
-            MovieCell(*movie_data)
-            for movie_data in zip(
-                self._transformer.get_movie_titles(),
-                self._transformer.get_movie_directors(),
-                self._transformer.get_movie_ratings(),
-                movie_poster_paths
+            MovieCell(*movie_tuple)
+            for movie_tuple in zip(
+                self._movie_data[0],
+                self._movie_data[1],
+                self._movie_data[2],
+                self._movie_data[3]
             )
         ]
 
     def to_dict(self) -> dict:
         return {
-            "_username": self._username,
-            "_scraper": self._scraper.to_dict(),  # Convert Scraper instance to dictionary
-            "_transformer": self._transformer.to_dict(),  # Convert Transformer instance to dictionary
-            "_mode": self._mode,
-            "_month": self._month
+            '_username': self._username,
+            '_mode': self._mode,
+            '_status': self._status,
+            '_movie_data': self._movie_data
         }
-    
