@@ -15,17 +15,16 @@ def trans_paste(fg_img, bg_img, alpha=1.0, box=(0, 0)):
     bg_img.paste(fg_img_trans,box,fg_img_trans)
     return bg_img
 
-def resize_image(im: Image, w_factor: float, h_factor: float) -> Image:
-	new_size = (int(im.size[0] * w_factor), int(im.size[1] * h_factor))
-	return im.resize(size=new_size)
+def resize_image(im: Image, thumbnail_size: tuple) -> Image:
+	return im.resize(size=thumbnail_size)
 
 # going to implement this because posters can have different dimensions/aspect ratios.
 # find out what usual size is for most thumbnails then just force all images to be same size
 # def resize_image(im: Image, size: tuple) -> Image:
 #     return im.resize(size=size)
 
-def build_thumbnail(cell: "MovieCell", resize_factor: float) -> Image:
-	return resize_image(Image.open(cell.im_path), resize_factor, resize_factor)
+def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
+	return resize_image(Image.open(cell.im_path), thumbnail_size)
 
 def build_background(thumbnail_width: int, thumbnail_height: int,
 					 grid_width: int, grid_height: int, text_width: int,
@@ -65,29 +64,33 @@ def load_config(path: str) -> list:
 	with open(path, 'r') as f:
 		config = json.load(f)
 	return (
-		    config['resize_factor'],
 			config['image_gap'], 
 			config['info_box_width'],
 			config['username_box_height'],
 			config['movie_info_font_size'],
 			config['username_font_size'],
-			config['font_color']
+			config['font_color'],
+			config['thumbnail_size']
 			)
 
 
 def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Image.Image:
 
+    print(f'CALLING BUILD')
     # loading config file
-    resize_factor, image_gap, info_box_width, \
+    image_gap, info_box_width, \
 	username_box_height, movie_info_font_size, \
-	username_font_size, font_color = load_config(config_path)
+	username_font_size, font_color, thumbnail_size \
+	= load_config(config_path)
 
     # create dynamically sized grid
     grid_width, grid_height = get_grid_size(len(movie_cells))
 	
     # creating thumbnails
-    thumbnails = list(map(partial(build_thumbnail, resize_factor=resize_factor), movie_cells))
+    thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
+	
+    print(f'THUMBNAIL SIZE{thumbnails[0].size}')
 
     # create background
     bg = build_background(thumb_width, thumb_height, grid_width, grid_height,
