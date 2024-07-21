@@ -12,6 +12,7 @@ import base64
 import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_session import Session
+from bleach import clean
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -19,12 +20,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
-def validate_submitted_string(s: str) -> bool:
-	# temporary until I figure out how i want to structure this
-	return True and rss_feed_exists(s)
-
 @app.route('/user/<string:username>')
 def dynamic_page(username: str):
+
+    username = clean(username)
 
     # see if serving image to user is possible
     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
@@ -55,6 +54,7 @@ def dynamic_page(username: str):
 
 @app.route('/download/<string:username>')
 def download_image(username: str):
+    username = clean(username)
     # see if serving image to user is possible
     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
     movie_cell_builder: MovieCellBuilder
@@ -91,9 +91,12 @@ def main_form():
         return render_template('main_form.html')
     
     submitted_username = request.form['username_submitted']
+    submitted_username = clean(submitted_username)
     movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=0)
     session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
     status, err = get_movie_cell_builder_status(movie_cell_builder)
+    if request.form.get('movie_mode'):
+        print(f'movie_mode: {request.form.get('movie_mode')}')
     if not status:
         return render_template('main_form.html', error_message=err)
 
@@ -127,9 +130,6 @@ def create_movie_cell_builder(username: str, mode: int = 0) -> MovieCellBuilder:
 
 def get_movie_cell_builder_status(movie_cell_builder: MovieCellBuilder) -> tuple[bool, str]:
     return movie_cell_builder.get_status()
-
-def serialize_movie_builder(movie_cell_builder: MovieCellBuilder) -> None:
-    session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
 
 def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
     '''

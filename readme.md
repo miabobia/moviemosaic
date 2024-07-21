@@ -13,7 +13,6 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
     - need a brief description of how software works (eg: only pulls from diary, uses letterboxd)
 - add stars onto posters (add ratings onto text field instead?)
 - add user's full name instead of username on generated image option (checkbox)
-- add string sanitization
 - add caching for movie posters
     - use shared memory/multiproccessing to handle cacheing
     - i wrote cache.py as an LRU cache with deque and set. Need to make instance of it and share between server.py and a worker process for proper caching

@@ -294,6 +294,7 @@ class MovieCellBuilder:
 
         self._username = username
         self._mode = mode
+        self._movie_data = None
 
         if status and status[0]:
             # class has been rehydrated and it has no good data
