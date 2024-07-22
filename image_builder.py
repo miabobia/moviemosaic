@@ -113,8 +113,8 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Im
     cell_index = 0
 	
     # paste thumbnails, text, and stars to background
-    for i in range(grid_width):
-        for j in range(grid_height):
+    for j in range(grid_height):
+        for i in range(grid_width):
             if cell_index >= len(movie_cells): break
 
             # thumbnails
