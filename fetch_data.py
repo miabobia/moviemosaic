@@ -224,6 +224,7 @@ class Transformer:
         # sorting movies by date
         items = sorted(filter(is_movie, items), key=lambda x: get_watched_date(x), reverse=True)
 
+        # going to remove this 
         if self._mode == 0:
             # getting movies watched this month
             items = list(filter(watched_this_month, items))

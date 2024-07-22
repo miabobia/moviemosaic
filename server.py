@@ -90,9 +90,11 @@ def main_form():
     if request.method == 'GET':
         return render_template('main_form.html')
     
-    submitted_username = request.form['username_submitted']
-    submitted_username = clean(submitted_username)
-    movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=0)
+    submitted_username = clean(request.form['username_submitted'])
+    movie_mode = 0
+    if request.form.get('movie_mode'):
+        movie_mode = 1
+    movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=movie_mode)
     session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
     status, err = get_movie_cell_builder_status(movie_cell_builder)
     if request.form.get('movie_mode'):
