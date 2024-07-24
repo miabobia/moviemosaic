@@ -134,7 +134,7 @@ def scrape(user: str, month: int) -> list:
     # # getting movies watched this month
     # items = list(filter(watched_this_month, items))
 
-    items = valid_movies(user, month)
+    items = self.valid_movies(user, month)
 
     movie_titles = list(map(get_movie_title, items))
     movie_ratings = list(map(get_movie_rating, items))
