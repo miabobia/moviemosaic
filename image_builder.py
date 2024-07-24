@@ -18,11 +18,6 @@ def trans_paste(fg_img, bg_img, alpha=1.0, box=(0, 0)):
 def resize_image(im: Image, thumbnail_size: tuple) -> Image:
 	return im.resize(size=thumbnail_size)
 
-# going to implement this because posters can have different dimensions/aspect ratios.
-# find out what usual size is for most thumbnails then just force all images to be same size
-# def resize_image(im: Image, size: tuple) -> Image:
-#     return im.resize(size=size)
-
 def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
 	return resize_image(Image.open(cell.im_path), thumbnail_size)
 
@@ -36,11 +31,11 @@ def build_background(thumbnail_width: int, thumbnail_height: int,
 		color=(50, 50, 50))
 
 def get_max_text_size(text_drawer: ImageDraw, font: ImageFont, text_list: list) -> int:
-	WIDTH_LIMIT = 500
+	MIN_WIDTH = 300
 	max_width = -1
 	for text in text_list:
 		max_width = max(text_drawer.textsize(text, font))
-	return min(max_width, WIDTH_LIMIT)
+	return max(max_width, MIN_WIDTH)
 
 def build_movie_text(movie_cell: "MovieCell") -> str:
 	mv_text = f'{movie_cell.title} - {movie_cell.director}'
@@ -75,8 +70,9 @@ def load_config(path: str) -> list:
 
 
 def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Image.Image:
-
-    print(f'CALLING BUILD')
+    '''
+    Takes in list of MovieCell's and generates MovieMosaic image
+    '''
     # loading config file
     image_gap, info_box_width, \
 	username_box_height, movie_info_font_size, \
@@ -89,8 +85,6 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Im
     # creating thumbnails
     thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
-	
-    print(f'THUMBNAIL SIZE{thumbnails[0].size}')
 
     # create background
     bg = build_background(thumb_width, thumb_height, grid_width, grid_height,

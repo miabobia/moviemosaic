@@ -60,7 +60,7 @@ def valid_movies(username: str, month: int):
         return  str(item.find('link')).find(f'https://letterboxd.com/{username}/list/') == -1 
 
     def watched_this_month(item) -> bool:
-        return get_watched_date(item) == month
+        return get_watched_date(item).month == month
     
     def has_watched_date(item) -> bool:
         watched_token = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
@@ -70,7 +70,7 @@ def valid_movies(username: str, month: int):
         date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
         date = datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
         # print(f'getwatched date returning: {date.month}')
-        return date.month
+        return date
     
     items = list(filter(has_watched_date, items))
 
@@ -114,7 +114,7 @@ def scrape(user: str, month: int) -> list:
     def get_poster_url(item) -> str:
         # attrs are broken inside description tag so we have to do this a little more manually
         url_slice = [m.start() for m in re.finditer('"', str(item.find('description')))]
-        return str(item.find('description'))[url_slice[0]+1:url_slice[1]]
+        return str(item.find('description'))[url_slice[0] + 1:url_slice[1]]
 
     def get_tmdb_id(item) -> int:
         return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
@@ -138,7 +138,11 @@ def scrape(user: str, month: int) -> list:
 
     movie_titles = list(map(get_movie_title, items))
     movie_ratings = list(map(get_movie_rating, items))
-    movie_directors = list(map(get_director, map(get_tmdb_id, items)))
+
+    # seperating this to implement getting poster urls from tmdb api
+    tmdb_ids = map(get_tmdb_id, items)
+
+    movie_directors = list(map(get_director, tmdb_ids))
     movie_poster_paths = list(map(title_to_image_path, movie_titles))
 
     # download posters

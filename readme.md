@@ -24,12 +24,3 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 # BUGS
 - any url is reachable without crashing ?
 - is there any tmdb entries without posters/titles?
-- movies are being displayed in incorrect order like this:
-    0 3 6
-    1 4 7
-    2 5 8
-
-want them in this order
-    0 1 2
-    3 4 5
-    6 7 8
