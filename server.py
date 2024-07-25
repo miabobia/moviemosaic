@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
 from datetime import datetime
-from fetch_data import scrape, rss_feed_exists, valid_movies, MovieCellBuilder, Scraper, Transformer
+from fetch_data import MovieCellBuilder
 from image_builder import build
 from ratio_tester import get_moviecells
 from flask import Flask, redirect, url_for, request, session, send_file, render_template
@@ -56,6 +56,10 @@ def dynamic_page(username: str):
 def download_image(username: str):
     username = clean(username)
     # see if serving image to user is possible
+
+
+
+
     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
     movie_cell_builder: MovieCellBuilder
     if not movie_cell_builder_dict:
@@ -94,6 +98,16 @@ def main_form():
     movie_mode = 0
     if request.form.get('movie_mode'):
         movie_mode = 1
+
+    # make sure session is cleared if image generation settings changed
+
+    if session.get(f'{submitted_username}_MovieCellBuilder', None):
+        # compare changes to current front page settings
+        movie_dict = session.get(f'{submitted_username}_MovieCellBuilder')
+        if movie_dict['_mode'] != movie_mode:
+            session.pop(f'{submitted_username}_MovieCellBuilder')
+            session.pop(f'{submitted_username}_image_string')
+
     movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=movie_mode)
     session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
     status, err = get_movie_cell_builder_status(movie_cell_builder)
@@ -116,9 +130,10 @@ def create_mosaic(username: str):
 
     mv_builder = rebuild_movie_cell_builder(username=username)
     movie_cells = mv_builder.build_cells()
+    last_watched_date = mv_builder.get_last_movie_date()
 
     buffer = io.BytesIO()
-    image = build(movie_cells, username, 'config.json')
+    image = build(movie_cells, username, 'config.json', last_watch_date=last_watched_date)
     image.save(buffer, format='PNG')
     buffer.seek(0)
     image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')

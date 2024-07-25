@@ -69,7 +69,7 @@ def load_config(path: str) -> list:
 			)
 
 
-def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Image.Image:
+def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_watch_date: datetime.datetime = None) -> Image.Image:
     '''
     Takes in list of MovieCell's and generates MovieMosaic image
     '''
@@ -97,7 +97,12 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str) -> Im
 	
     # writing username and date to image
     my_date = datetime.datetime.now()
-    username_str = f'{username} - {my_date.strftime("%B")} {my_date.strftime("%Y")}'
+    username_str = f'{username} - '
+    if not last_watch_date:
+        username_str = f'{username_str}{my_date.strftime("%B")} {my_date.strftime("%Y")}'
+    else:
+        username_str = f'{username_str}{last_watch_date.strftime("%B")} {last_watch_date.strftime("%Y")} - {my_date.strftime("%B")} {my_date.strftime("%Y")}'
+
     username_width, username_height = get_text_dimensions(username_str, username_font)
     username_x = bg._size[0]//2 - username_width//2
     username_y = username_box_height//2 - username_height//2

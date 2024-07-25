@@ -16,11 +16,6 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 - add caching for movie posters
     - use shared memory/multiproccessing to handle cacheing
     - i wrote cache.py as an LRU cache with deque and set. Need to make instance of it and share between server.py and a worker process for proper caching
-- more options for what movies can be retrieved?
-    - add option to fetch last 30 (50 is max) movies from rss
 - change right side of image so it resizes based on max text length
-- 
+- change font?
 
-# BUGS
-- any url is reachable without crashing ?
-- is there any tmdb entries without posters/titles?
