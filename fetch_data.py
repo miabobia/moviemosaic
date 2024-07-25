@@ -13,19 +13,38 @@ import asyncio
 import aiofiles
 from moviecell import MovieCell
 import os
+from PIL import Image
+from io import BytesIO
 
 async def download(name_url: tuple[str], session):
     # url = name_url[1]
     # filename = name_url[0]
     filename, url = name_url
+    image_data: bytes
+    async with session.get(url) as response:
+        image_data = await response.read()
+
+    with Image.open(BytesIO(image_data)) as img:
+
+        print(f'pre resize - {img.size}')
+
+        img = img.resize((120, 180))
+
+        print(f'post resize - {img.size}')
+        format = img.format if img.format else 'PNG'
+        # Save the resized image to a file
+        async with aiofiles.open(filename, "wb") as f:
+            with BytesIO() as buffer:
+                img.save(buffer, format=format)
+                await f.write(buffer.getvalue())
 
     # put in shared cache object here
     # it will check if 'filename' already exists
     # if it does then just return no further action needed
     # else call function regularly
-    async with session.get(url) as response:
-        async with aiofiles.open(filename, "wb") as f:
-            await f.write(await response.read())
+    # async with session.get(url) as response:
+    #     async with aiofiles.open(filename, "wb") as f:
+    #         await f.write(await response.read())
 
 async def download_all(name_urls: list[tuple]):
     async with aiohttp.ClientSession() as session:

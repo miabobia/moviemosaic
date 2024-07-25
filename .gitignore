@@ -163,3 +163,4 @@ cython_debug/
 
 *.png
 .env
+profiler.py

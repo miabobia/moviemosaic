@@ -13,6 +13,7 @@ import secrets
 from apscheduler.schedulers.background import BackgroundScheduler
 from flask_session import Session
 from bleach import clean
+# from profiler import profile_function
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -21,6 +22,7 @@ app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
 @app.route('/user/<string:username>')
+# @profile_function('dynamic_page_profile.pstat')
 def dynamic_page(username: str):
 
     username = clean(username)
@@ -90,6 +92,7 @@ def download_image(username: str):
 
 
 @app.route('/', methods=['GET', 'POST'])
+# @profile_function('main_form.pstat')
 def main_form():
     if request.method == 'GET':
         return render_template('main_form.html')
@@ -118,7 +121,7 @@ def main_form():
 
     return redirect(url_for('dynamic_page', username=submitted_username))
 
-
+# @profile_function('create_mosaic.pstat')
 def create_mosaic(username: str):
     '''
     Pushes Movie Mosaic image based on username into session.
@@ -139,15 +142,16 @@ def create_mosaic(username: str):
     image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
     session[f'{username}_image_string'] = image_string
 
+# @profile_function('create_movie_cell_builder.pstat')
 def create_movie_cell_builder(username: str, mode: int = 0) -> MovieCellBuilder:
     return MovieCellBuilder(
         username=username,
         mode=mode
     )
-
 def get_movie_cell_builder_status(movie_cell_builder: MovieCellBuilder) -> tuple[bool, str]:
     return movie_cell_builder.get_status()
 
+# @profile_function('rebuild.pstat')
 def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
     '''
     Takes in username and builds MovieCellBuilder based on current session.

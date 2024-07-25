@@ -19,7 +19,7 @@ def resize_image(im: Image, thumbnail_size: tuple) -> Image:
 	return im.resize(size=thumbnail_size)
 
 def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
-	return resize_image(Image.open(cell.im_path), thumbnail_size)
+	return Image.open(cell.im_path)
 
 def build_background(thumbnail_width: int, thumbnail_height: int,
 					 grid_width: int, grid_height: int, text_width: int,
