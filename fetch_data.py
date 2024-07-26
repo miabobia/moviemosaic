@@ -20,6 +20,8 @@ async def download(name_url: tuple[str], session):
     # url = name_url[1]
     # filename = name_url[0]
     filename, url = name_url
+    if not url:
+        return
     image_data: bytes
     async with session.get(url) as response:
         image_data = await response.read()
