@@ -32,7 +32,10 @@ def get_tmdb_poster_url(movie_id: int) -> str:
     print(movie_id)
 
     movie = tmdb.Movies(movie_id)
-    file_path = movie.images(include_image_language='en')['posters'][0]['file_path']
+    posters = movie.images(include_image_language='en')['posters']
+    if not len(posters):
+        return None
+    file_path = posters[0]['file_path']
 
     # for key in image_dict:
     #     print(f'{key}')
