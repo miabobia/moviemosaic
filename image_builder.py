@@ -19,8 +19,8 @@ def resize_image(im: Image, thumbnail_size: tuple) -> Image:
 	return im.resize(size=thumbnail_size)
 
 def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
-	if cell.im_path == None:
-		Image.open('NoPoster.png')
+	if not cell.im_path:
+		return Image.open('NoPoster.png')
 	return Image.open(cell.im_path)
 
 def build_background(thumbnail_width: int, thumbnail_height: int,
