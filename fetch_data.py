@@ -272,6 +272,11 @@ class MovieCellBuilder:
             transformer.get_last_movie_date()
         ]
 
+        # we need to make sure poster paths are taken out if there is no url
+        for index, url in enumerate(self._movie_data[4]):
+            if not url:
+                self._movie_data[3][index] = None
+
         # set status so we know data is good
         self._status = (True, f'movie data for {self._username} good')
 
