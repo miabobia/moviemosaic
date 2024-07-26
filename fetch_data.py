@@ -192,7 +192,12 @@ class Transformer:
     
     def get_movie_directors(self) -> list:
         def get_tmdb_id(item) -> int:
-            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
+            # make this into a class func with partial args
+            # tmdb_movie_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[0])
+            # if tmdb_movie_id == -1:
+                # tmdb_tv_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:tvId")))[0])
+            # we need to pass a flag to our tmdb_fetch functions telling them if it's a tv show or a movie**
+            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[0])
         return list(map(get_director, map(get_tmdb_id, self._movies)))
     
     def get_movie_poster_paths(self) -> list:
@@ -206,8 +211,18 @@ class Transformer:
     
     def get_movie_poster_urls(self) -> list:
         def get_tmdb_id(item) -> int:
-            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
+
+            # tmdb_movie_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[0])
+            # if tmdb_movie_id == -1:
+                # tmdb_tv_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:tvId")))[0])
+            # we need to pass a flag to our tmdb_fetch functions telling them if it's a tv show or a movie**
+            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[0])
         
+        def get_poster_url(item) -> str:
+            # some titles dont have tmdb ids ??
+            # lets figure this part out first
+            pass
+
         return list(map(get_tmdb_poster_url, map(get_tmdb_id, self._movies)))
 
     def valid_movies_exist(self) -> bool:
