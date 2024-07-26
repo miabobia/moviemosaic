@@ -6,15 +6,26 @@
         text-align: center;
         margin-top: 10%; /* 25% margin above the content */
       }
+      .logo-container {
+        margin-top: 10px; /* 10px margin from the top of the screen */
+        text-align: center;
+      }
       .container {
         background-color: #f1e2a3; /* light yellow */
         padding: 20px;
         border-radius: 10px;
         display: inline-block;
       }
+      img {
+        max-width: 100%; /* Ensure the image scales responsively */
+        height: auto; /* Maintain aspect ratio */
+      }
     </style>
   </head>
   <body>
+    <div class="logo-container">
+      <img src="logo_with_bg.png" alt="Logo">
+    </div>
     <div class="container">
       <form action="" method="post">
         <input type="text" name="username_submitted" required>
