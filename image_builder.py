@@ -42,10 +42,13 @@ def get_max_text_size(text_drawer: ImageDraw, font: ImageFont, text_list: list) 
 
 def build_movie_text(movie_cell: "MovieCell") -> str:
 	#(★ or ☆ or ⯨).
-	empty_stars = 5 - movie_cell.rating # get empty stars with decimal
-	half_stars = movie_cell.rating % 1 # get decimal (half stars)
-	empty_stars = int(empty_stars - half_stars) # take off half stars then round down 
-	star_str = f'{'★' * int(movie_cell.rating)}{'⯨' * ceil(half_stars)}{'☆' * empty_stars}'
+    if movie_cell.rating == -1
+        star_str = '-----'
+    else:
+        empty_stars = 5 - movie_cell.rating # get empty stars with decimal
+        half_stars = movie_cell.rating % 1 # get decimal (half stars)
+        empty_stars = int(empty_stars - half_stars) # take off half stars then round down 
+        star_str = f'{'★' * int(movie_cell.rating)}{'⯨' * ceil(half_stars)}{'☆' * empty_stars}'
 	
 	# rating_str = f'{}'
 	mv_text = f'{star_str} - {movie_cell.title} - {movie_cell.director}'
