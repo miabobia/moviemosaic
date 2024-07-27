@@ -88,14 +88,14 @@ class Transformer:
     '''
     _username: str
     _mode: int
-    _month: int
+    _date: datetime
     _movies: list[str]
     _feed_content: bytes
 
-    def __init__(self, username: str, mode: int, month: int, feed_content: bytes):
+    def __init__(self, username: str, mode: int, date: datetime, feed_content: bytes):
         self._username = username
         self._mode = mode
-        self._month = month
+        self._date = date
         self._feed_content = feed_content
         print('transformer created!')
     
@@ -112,9 +112,20 @@ class Transformer:
     def remove_duplicate_movies(self, items: list):
         # abomination of a function :)
         def get_movie_title(item) -> str:
-            return re.split(pattern='<|>', string=str(item.find("letterboxd:filmTitle")))[2]
-        titles = map(get_movie_title, items)
+            return item.find('letterboxd:filmTitle').string
+        
+
         title_locs = {}
+        for index, item in enumerate(items):
+            title = get_movie_title(item)
+            if title in title_locs:
+                title_locs[title].append(index)
+            else:
+                title_locs[title] = [index]
+
+        keep_indices = set([loc[0] for loc in title_locs.values()])
+        return [item for index, item in enumerate(items) if index in keep_indices]
+        titles = map(get_movie_title, items)
         for index, title in enumerate(titles):
             if title in title_locs:
                 title_locs[title].append(index)
@@ -133,17 +144,23 @@ class Transformer:
             return str(item.find('link')).find(f'https://letterboxd.com/{self._username}/list/') == -1 
 
         def watched_this_month(item) -> bool:
-            return get_watched_date(item).month == self._month
+            # if 'Departed' in str(item):
+            #     print(f'DEPARTED WATCH DATE {get_watched_date(item)} MONTH: {get_watched_date(item).month}')
+            watched_date = get_watched_date(item)
+            return watched_date.month == self._date.month and watched_date.year == self._date.year
         
         def has_watched_date(item) -> bool:
+            watched_date = item.find('letterboxd:watchedDate')
+            return not watched_date is None
             watched_token = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
             return watched_token != ['None']
         
         def get_watched_date(item) -> datetime:
-            date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
-            date = datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
-            # print(f'getwatched date returning: {date.month}')
-            return date
+            date_val = item.find('letterboxd:watchedDate')
+            date_split = date_val.string.split('-')
+            print(date_split)
+            # date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
+            return datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
 
         # ensure item has watched date field
         items = list(filter(has_watched_date, self.get_items()))
@@ -191,14 +208,23 @@ class Transformer:
         return list(map(get_movie_rating, self._movies))
     
     def get_movie_directors(self) -> list:
-        def get_tmdb_id(item) -> int:
+        def get_tmdb_id(item) -> tuple[int, str]:
             # make this into a proper function ??
             # tmdb_movie_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[0])
             # if tmdb_movie_id == -1:
                 # tmdb_tv_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:tvId")))[0])
             # we need to pass a flag to our tmdb_fetch functions telling them if it's a tv show or a movie**
-            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
-        return list(map(get_director, map(get_tmdb_id, self._movies)))
+            tmdb_id = item.find('tmdb:movieId')
+            tmdb_type = 'mv'
+            if not tmdb_id:
+                tmdb_id = item.find('tmdb:tvId')
+                tmdb_type = 'tv'
+
+            return (int((tmdb_id.string)), tmdb_type)
+        
+        return [get_director(id, t) for id, t in map(get_tmdb_id, self._movies)]
+
+        # return list(map(get_director, map(get_tmdb_id, self._movies)))
     
     def get_movie_poster_paths(self) -> list:
         def title_to_image_path(title: str):
@@ -216,13 +242,15 @@ class Transformer:
             # if tmdb_movie_id == -1:
                 # tmdb_tv_id = int(re.split(pattern='<|>', string=str(item.find("tmdb:tvId")))[0])
             # we need to pass a flag to our tmdb_fetch functions telling them if it's a tv show or a movie**
-            return int(re.split(pattern='<|>', string=str(item.find("tmdb:movieId")))[2])
-        
-        def get_poster_url(item) -> str:
-            # some titles dont have tmdb ids ??
-            # lets figure this part out first
-            pass
+            tmdb_id = item.find('tmdb:movieId')
+            tmdb_type = 'mv'
+            if not tmdb_id:
+                tmdb_id = item.find('tmdb:tvId')
+                tmdb_type = 'tv'
 
+            return (int((tmdb_id.string)), tmdb_type)
+
+        return [get_tmdb_poster_url(id, t) for id, t in map(get_tmdb_id, self._movies)]
         return list(map(get_tmdb_poster_url, map(get_tmdb_id, self._movies)))
 
     def valid_movies_exist(self) -> bool:
@@ -271,7 +299,7 @@ class MovieCellBuilder:
             return
 
         # attempt to transform scraped data and set status to false if data not viable
-        transformer = Transformer(username=username, mode=self._mode, month=datetime.now().month, feed_content=scraper.get_rss_feed())
+        transformer = Transformer(username=username, mode=self._mode, date=datetime.now(), feed_content=scraper.get_rss_feed())
         transformer.load_movies()
         if not transformer.valid_movies_exist():
             self._status = (False, f'{self._username} has no valid movies according to the criteria')
@@ -296,7 +324,7 @@ class MovieCellBuilder:
         self._status = (True, f'movie data for {self._username} good')
 
     def get_last_movie_date(self) -> datetime:
-        if not self._movie_data:
+        if not self._movie_data or self._mode == 0:
             return None
         return self._movie_data[5]
 

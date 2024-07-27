@@ -2,7 +2,7 @@
 "image_gap": 10,
 "info_box_width": 500,
 "username_box_height": 50,
-"movie_info_font_size": 12,
+"movie_info_font_size": 14,
 "username_font_size": 20,
 "font_color": [255, 255, 255],
 "thumbnail_size": [120,180]

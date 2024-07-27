@@ -8,6 +8,7 @@ from grid_shape import get_grid_size
 import json
 from functools import partial
 import datetime
+from math import ceil
 
 def trans_paste(fg_img, bg_img, alpha=1.0, box=(0, 0)):
     fg_img_trans = Image.new("RGBA", fg_img.size)
@@ -40,11 +41,18 @@ def get_max_text_size(text_drawer: ImageDraw, font: ImageFont, text_list: list) 
 	return max(max_width, MIN_WIDTH)
 
 def build_movie_text(movie_cell: "MovieCell") -> str:
-	mv_text = f'{movie_cell.title} - {movie_cell.director}'
-	if len(mv_text) > 68:
-		director = movie_cell.director.split(' ')
-		director[-1] = director[-1][0]
-		mv_text = f'{movie_cell.title} - {' '.join(map(str, director)) }'
+	#(★ or ☆ or ⯨).
+	empty_stars = 5 - movie_cell.rating # get empty stars with decimal
+	half_stars = movie_cell.rating % 1 # get decimal (half stars)
+	empty_stars = int(empty_stars - half_stars) # take off half stars then round down 
+	star_str = f'{'★' * int(movie_cell.rating)}{'⯨' * ceil(half_stars)}{'☆' * empty_stars}'
+	
+	# rating_str = f'{}'
+	mv_text = f'{star_str} - {movie_cell.title} - {movie_cell.director}'
+	# if len(mv_text) > 68:
+	# 	director = movie_cell.director.split(' ')
+	# 	director[-1] = director[-1][0]
+	# 	mv_text = f'{movie_cell.title} - {' '.join(map(str, director)) }'
 	return mv_text
 
 def get_text_dimensions(text_string: str, font: ImageFont.truetype):
@@ -71,7 +79,7 @@ def load_config(path: str) -> list:
 			)
 
 
-def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_watch_date: datetime.datetime = None) -> Image.Image:
+def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_watch_date: datetime.datetime) -> Image.Image:
     '''
     Takes in list of MovieCell's and generates MovieMosaic image
     '''
@@ -81,30 +89,40 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
 	username_font_size, font_color, thumbnail_size \
 	= load_config(config_path)
 
+
     # create dynamically sized grid
     grid_width, grid_height = get_grid_size(len(movie_cells))
-	
+
     # creating thumbnails
     thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
 
-    # create background
-    bg = build_background(thumb_width, thumb_height, grid_width, grid_height,
-						  info_box_width, username_box_height, image_gap)
     
     # defining fonts
     info_font = ImageFont.truetype('./font/JuliaMono-Bold.ttf', movie_info_font_size, encoding='utf-8')
     username_font = ImageFont.truetype('./font/JuliaMono-Bold.ttf', username_font_size, encoding='utf-8')
-    text_drawer = ImageDraw.Draw(bg)
 	
+
+    # load all movie_texts into a list then find max width
+    movie_text = [build_movie_text(movie_cells[i]) for i in range(len(movie_cells))]
+    # get_text_dimensions(username_str, info_font)
+    max_movie_text = max(movie_text, key=lambda x: get_text_dimensions(x, info_font)[0])
+    # print(max_movie_text)
+    info_box_width = max(info_box_width, get_text_dimensions(max_movie_text, info_font)[0] + image_gap)
+
+    # create background
+    bg = build_background(thumb_width, thumb_height, grid_width, grid_height,
+						  info_box_width, username_box_height, image_gap)
+    text_drawer = ImageDraw.Draw(bg)
+
     # writing username and date to image
     my_date = datetime.datetime.now()
     username_str = f'{username} - '
-    if not last_watch_date:
-        username_str = f'{username_str}{my_date.strftime("%B")} {my_date.strftime("%Y")}'
+    if last_watch_date:
+        username_str = f'{username_str}{last_watch_date.strftime("%B")} {last_watch_date.strftime("%Y")} - {my_date.strftime("%B")} {my_date.strftime("%Y")}'		
     else:
-        username_str = f'{username_str}{last_watch_date.strftime("%B")} {last_watch_date.strftime("%Y")} - {my_date.strftime("%B")} {my_date.strftime("%Y")}'
-
+        username_str = f'{username_str}{my_date.strftime("%B")} {my_date.strftime("%Y")}'
+    
     username_width, username_height = get_text_dimensions(username_str, username_font)
     username_x = bg._size[0]//2 - username_width//2
     username_y = username_box_height//2 - username_height//2
@@ -128,7 +146,7 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
             txt_x = grid_width * thumb_width + image_gap * (grid_width+1)
             txt_y = (j % grid_width) * thumb_height + image_gap * ((j % grid_width) + 1) + (i*20) + username_box_height
 
-            txt_str = build_movie_text(movie_cells[cell_index])
+            txt_str = movie_text[cell_index]
             print(f'{txt_str} -> {len(txt_str)}')
 
             text_drawer.text((txt_x, txt_y), txt_str, font=info_font, fill=tuple(font_color))
