@@ -56,7 +56,7 @@ def build_movie_text(movie_cell: "MovieCell") -> str:
 	# 	director = movie_cell.director.split(' ')
 	# 	director[-1] = director[-1][0]
 	# 	mv_text = f'{movie_cell.title} - {' '.join(map(str, director)) }'
-	return mv_text
+    return mv_text
 
 def get_text_dimensions(text_string: str, font: ImageFont.truetype):
     # https://stackoverflow.com/a/46220683/9263761
