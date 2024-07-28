@@ -42,7 +42,7 @@ def get_max_text_size(text_drawer: ImageDraw, font: ImageFont, text_list: list) 
 
 def build_movie_text(movie_cell: "MovieCell") -> str:
 	#(★ or ☆ or ⯨).
-    if movie_cell.rating == -1
+    if movie_cell.rating == -1:
         star_str = '-----'
     else:
         empty_stars = 5 - movie_cell.rating # get empty stars with decimal
