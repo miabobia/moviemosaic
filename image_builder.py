@@ -51,7 +51,7 @@ def build_movie_text(movie_cell: "MovieCell") -> str:
         star_str = f'{'★' * int(movie_cell.rating)}{'⯨' * ceil(half_stars)}{'☆' * empty_stars}'
 	
 	# rating_str = f'{}'
-	mv_text = f'{star_str} - {movie_cell.title} - {movie_cell.director}'
+    mv_text = f'{star_str} - {movie_cell.title} - {movie_cell.director}'
 	# if len(mv_text) > 68:
 	# 	director = movie_cell.director.split(' ')
 	# 	director[-1] = director[-1][0]
