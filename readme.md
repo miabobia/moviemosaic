@@ -18,4 +18,4 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
     - i wrote cache.py as an LRU cache with deque and set. Need to make instance of it and share between server.py and a worker process for proper caching
 - change right side of image so it resizes based on max text length
 - change font?
-- make it so posters can be any language but choose english if available
+- implement database and decouple front-end and back-end
