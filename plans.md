@@ -38,3 +38,93 @@ the database will be the 'communication layer' (probably wrong terminology but m
 | 883921839 | {image_byte_string} |
 8. if the STATUS becomes ERROR then url redirects to homepage with ERROR_MSG. Otherwise once STATUS == COMPLETE then we redirect to /user/{letterboxd_username} with the image_byte_string from RESULT
 
+
+
+
+
+# EXAMPLE CODE
+defined tables earlier like this
+```
+cursor.execute("CREATE TABLE tasks(id, action, progress_msg, status, error_msg)")
+cursor.execute("CREATE TABLE results(id, result)")
+```
+
+front.py
+```
+from time import sleep
+import sqlite3
+import uuid
+
+con = sqlite3.connect('mydb.db')
+usernames = ['john', 'mia', 'targus', 'chris', 'chadley', 'derek', 'yama', 'lise', 'tunnelman', 'pilot']
+i = 0
+cursor = con.cursor()
+while True:
+    x = input('what u wanna do?')
+
+    if str(x) != 't' and str(x) != 'd':
+        # start task
+        continue
+
+    if str(x) == 'd':
+        cursor.execute("SELECT * FROM TASKS")
+        # print(cursor.fetchall())
+        for row in cursor.fetchall():
+            print(row,end='\n')
+
+        continue
+
+    cursor.execute(f'''INSERT INTO TASKS(id, action, progress_msg, status, error_msg)
+                VALUES (?, ?, ?, ?, ?);''', (str(uuid.uuid4()), f'{usernames[i]}_create_mosaic', 'NOT STARTED', 'WAITING', 'NULL'))
+    con.commit()
+    i += 1
+    if i == len(usernames): i = 0
+```
+
+worker.py
+```
+from time import sleep
+import sqlite3
+con = sqlite3.connect('mydb.db')
+
+cursor = con.cursor()
+
+statuses = ["WAITING", "PROGRESSING", "COMPLETE"]
+
+task_check_query = "SELECT * FROM TASKS;"
+while True:
+
+    sleep(1)
+    input('step')
+    cursor.execute(task_check_query)
+
+    rows = cursor.fetchall()
+
+    for row in rows:
+        print(row)
+        if row[3] == "WAITING":
+            cursor.execute(
+                """
+                UPDATE TASKS
+                SET STATUS = "PROGRESSING"
+                """
+            )
+            con.commit()
+        elif row[3] == "PROGRESSING":
+            cursor.execute(
+                """
+                UPDATE TASKS
+                SET STATUS = "COMPLETE"
+                """)
+        elif row[3] == "COMPLETE":
+            cursor.execute("""
+                INSERT INTO RESULTS(id, result)
+                VALUES (?, ?)
+                           """, (row[0], 'TEST RESULT'))
+        con.commit()
+
+```
+
+front.py in production wouldn't be on a while loop it would be constantly run via flask's event loop. 
+Then we could constantly be checking the results table and tasks table to provide progress updates.
+```input('step')``` was placed there just so i could test in real time since tasks would be done too quickly in this env
