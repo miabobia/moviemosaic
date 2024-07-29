@@ -41,6 +41,11 @@ the database will be the 'communication layer' (probably wrong terminology but m
 
 # POSSIBLE ISSUES ?
 does worker need threads to work on multiple tasks at once?
+how do I handle maintenance of the database?
+    - scheduling a job to clear out data on the database?
+    - clearing data after user disconnects?
+    - do I need to create backups of data regularly?
+    - how would I handle users attempting to use the site while the database is full?
 
 
 # EXAMPLE CODE
