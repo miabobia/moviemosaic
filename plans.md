@@ -39,7 +39,8 @@ the database will be the 'communication layer' (probably wrong terminology but m
 8. if the STATUS becomes ERROR then url redirects to homepage with ERROR_MSG. Otherwise once STATUS == COMPLETE then we redirect to /user/{letterboxd_username} with the image_byte_string from RESULT
 
 
-
+# POSSIBLE ISSUES ?
+does worker need threads to work on multiple tasks at once?
 
 
 # EXAMPLE CODE
