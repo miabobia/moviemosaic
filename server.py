@@ -23,7 +23,10 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
-DATABASE = "/sqlitedata/database.sqlite3"
+if os.path.isfile('.env'):
+    DATABASE = "./sqlitedata/database.sqlite3"
+else:
+    DATABASE = "/sqlitedata/database.sqlite3"
 
 # ===============================================
 
@@ -32,7 +35,8 @@ def get_db():
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
         # create table if it does not exist
-        db.execute("create table if not exists hits (x int)")
+        # db.execute("create table if not exists hits (x int)")
+        db.execute("CREATE TABLE IF NOT EXISTS TASKS(id, action, progress_msg, status, error_msg)")
     return db
 
 
@@ -123,6 +127,9 @@ def main_form():
     if request.form.get('movie_mode'):
         movie_mode = 1
 
+    # insert into database
+    db_test(submitted_username)
+
     # make sure session is cleared if image generation settings changed
 
     if session.get(f'{submitted_username}_MovieCellBuilder', None):
@@ -151,7 +158,7 @@ def create_mosaic(username: str):
 
     if session.get(f'{username}_image_string', None):
         return
-
+    
     mv_builder = rebuild_movie_cell_builder(username=username)
     movie_cells = mv_builder.build_cells()
     last_watched_date = mv_builder.get_last_movie_date()
@@ -187,6 +194,17 @@ def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
         movie_data=mv_builder_dict['_movie_data']
     )
     return builder
+
+def db_test(username: str):
+    get_db().execute(f"""INSERT INTO TASKS(id, action, progress_msg, status, error_msg)
+                     VALUES (?, ?, ?, ?, ?);""", ('hello_world', username + '_create_mosaic', 'NOT STARTED', 'WAITING', 'NULL'))
+    get_db().commit()
+
+    cur = get_db().execute("SELECT * FROM TASKS")
+    res = cur.fetchall()
+    cur.close()
+    for row in res:
+        print(row)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
