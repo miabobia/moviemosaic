@@ -2,42 +2,25 @@ import os
 from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
+from datetime import datetime
 from fetch_data import MovieCellBuilder
 from image_builder import build
+from ratio_tester import get_moviecells
 from flask import Flask, redirect, url_for, request, session, send_file, render_template
 import io
 import base64
 import secrets
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask_session import Session
 from bleach import clean
-import sqlite3
 
-# ==================================================
+# from profiler import profile_function
 
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
-
-DATABASE = "/sqlitedata/database.sqlite3"
-
-
-def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
-        # create table if it does not exist
-        db.execute("create table if not exists hits (x int)")
-    return db
-
-
-@app.teardown_appcontext
-def close_connection(exception):
-    db = getattr(g, "_database", None)
-    if db is not None:
-        db.close()
-
 
 @app.route('/user/<string:username>')
 # @profile_function('dynamic_page_profile.pstat')
