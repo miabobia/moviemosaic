@@ -3,10 +3,16 @@
     "services": {
         "web": {
             "port": 8080,
-            "volumes":[{
-                "name": "images",
-                "destinationPath": "/images"
-        }]
+            "volumes": [
+                {
+                    "name": "images",
+                    "destinationPath": "/images"
+                },
+                {
+                    "name": "sqlite-data",
+                    "destinationPath": "/sqlitedata"
+                }
+            ]
         }
     }
 }
