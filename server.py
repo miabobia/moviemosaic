@@ -41,8 +41,8 @@ def get_db():
         cur.execute('DROP TABLE IF EXISTS RESULTS')
         cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
         cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
-        cur.commit()
         cur.close()
+        db.commit()
     return db
 
 
@@ -226,6 +226,7 @@ def task_page(task_id: str):
     SELECT STATUS, PROGRESS_MSG, USER FROM TASKS WHERE ID = ?
     """, (task_id))
     task = cur.fetchone()
+    cur.close()
     if task:
         status, progress_msg, username = task
 
@@ -263,8 +264,8 @@ def start_task(user: str, mode: int) -> str:
         """,
         (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
     )
-    cur.commit()
     cur.close()
+    get_db().commit()
     return task_id
 
 def get_result(task_id: str) -> str:
@@ -274,6 +275,7 @@ def get_result(task_id: str) -> str:
     """, (task_id))
 
     result = cur.fetchone()
+    cur.close()
     return result[0]
 
 if __name__ == "__main__":

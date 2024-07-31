@@ -107,6 +107,5 @@ if __name__ == '__main__':
     cur.execute('DROP TABLE IF EXISTS RESULTS')
     cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
     cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
-    cur.commit()
-    cur.close()
+    db.commit()
     main(db)
