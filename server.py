@@ -247,7 +247,7 @@ def dynamic_page2(username: str, task_id: str):
     displays image_string from RESULTS table in db after task complete
     '''
     image_string = get_result(task_id=task_id)
-    return render_template('dynamic_page.html', image=image_string)
+    return render_template('dynamic_page2.html', image=image_string)
 
 # TASKS(id, user, mode, progress_msg, status, error_msg)")
 def start_task(user: str, mode: int) -> str:
