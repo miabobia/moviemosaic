@@ -38,7 +38,7 @@ def push_result(db: sqlite3.Connection, task_id: str, result: str):
         INSERT INTO RESULTS
         VALUES (?, ?, ?)
         """,
-        (task_id, result, str(datetime.datetime.now()))
+        (task_id, result, 'TEST')
         )
     db.commit()
 
