@@ -14,7 +14,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from flask_session import Session
 from bleach import clean
 import sqlite3
-
+from uuid import uuid4
 # ===============================================
 
 app = Flask(__name__)
@@ -36,7 +36,9 @@ def get_db():
         db = g._database = sqlite3.connect(DATABASE)
         # create table if it does not exist
         # db.execute("create table if not exists hits (x int)")
-        db.execute("CREATE TABLE IF NOT EXISTS TASKS(id, action, progress_msg, status, error_msg)")
+        db.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
+        db.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
+        
     return db
 
 
@@ -127,27 +129,29 @@ def main_form():
     if request.form.get('movie_mode'):
         movie_mode = 1
 
-    # insert into database
-    db_test(submitted_username)
+    task_id = start_task(submitted_username, movie_mode)
+    return redirect(url_for('task_page', task_id=task_id))
+    # # insert into database
+    # db_test(submitted_username)
 
-    # make sure session is cleared if image generation settings changed
+    # # make sure session is cleared if image generation settings changed
 
-    if session.get(f'{submitted_username}_MovieCellBuilder', None):
-        # compare changes to current front page settings
-        movie_dict = session.get(f'{submitted_username}_MovieCellBuilder')
-        if movie_dict['_mode'] != movie_mode:
-            session.pop(f'{submitted_username}_MovieCellBuilder')
-            session.pop(f'{submitted_username}_image_string')
+    # if session.get(f'{submitted_username}_MovieCellBuilder', None):
+    #     # compare changes to current front page settings
+    #     movie_dict = session.get(f'{submitted_username}_MovieCellBuilder')
+    #     if movie_dict['_mode'] != movie_mode:
+    #         session.pop(f'{submitted_username}_MovieCellBuilder')
+    #         session.pop(f'{submitted_username}_image_string')
 
-    movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=movie_mode)
-    session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
-    status, err = get_movie_cell_builder_status(movie_cell_builder)
-    if request.form.get('movie_mode'):
-        print(f'movie_mode: {request.form.get('movie_mode')}')
-    if not status:
-        return render_template('main_form.html', error_message=err)
+    # movie_cell_builder = create_movie_cell_builder(username=submitted_username, mode=movie_mode)
+    # session[f'{submitted_username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
+    # status, err = get_movie_cell_builder_status(movie_cell_builder)
+    # if request.form.get('movie_mode'):
+    #     print(f'movie_mode: {request.form.get('movie_mode')}')
+    # if not status:
+    #     return render_template('main_form.html', error_message=err)
 
-    return redirect(url_for('dynamic_page', username=submitted_username))
+    # return redirect(url_for('dynamic_page', username=submitted_username))
 
 # @profile_function('create_mosaic.pstat')
 def create_mosaic(username: str):
@@ -205,6 +209,68 @@ def db_test(username: str):
     cur.close()
     for row in res:
         print(row)
+
+@app.route('/task/<string:task_id>')
+def task_page(task_id: str):
+    '''
+    screen for displaying progress updates on the current task.
+    task should be pushed to db before this is called.
+    '''
+
+    cur = get_db().cursor()
+    cur.execute(f"""
+    SELECT STATUS, PROGRESS_MSG, USER FROM TASKS WHERE ID = ?
+    """, (task_id))
+    task = cur.fetchone()
+    if task:
+        status, progress_msg, username = task
+
+        if status == 'COMPLETE':
+            # result has been pushed by worker
+            # redirect to page to show user the image_string
+            return redirect(url_for('dynamic_page2', username=username, task_id=task_id))
+        elif status == 'ERROR':
+            return render_template('main_form.html', error_message=err)
+
+        # task still loading
+        return(render_template('task_page.html', progress_msg=progress_msg))
+    # serve an html page that uses the meta tag to refresh to display the current progress_msg
+
+@app.route('/userrr/<string:username>/<string:task_id>')
+def dynamic_page2(username: str, task_id: str):
+    '''
+    displays image_string from RESULTS table in db after task complete
+    '''
+    image_string = get_result(task_id=task_id)
+    return render_template('dynamic_page.html', image=image_string)
+
+# TASKS(id, user, mode, progress_msg, status, error_msg)")
+def start_task(user: str, mode: int) -> str:
+    '''
+    starts task in database and returns corresponding id of task
+    '''
+
+    task_id = str(uuid4())
+
+    cur = get_db().execute(
+        """
+        INSERT INTO TASKS 
+        VALUES (?, ?, ?, ?, ?, ?)
+        """,
+        (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
+    )
+    cur.close()
+    cur.commit()
+    return task_id
+
+def get_result(task_id: str) -> str:
+    cur = get_db().cursor()
+    cur.execute("""
+    SELECT RESULT FROM RESULTS WHERE ID = ?
+    """, (task_id))
+
+    result = cur.fetchone()
+    return result[0]
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)

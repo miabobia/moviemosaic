@@ -179,6 +179,7 @@ if both tasks get to COMPLETE status then worker writes a new row to the RESULTS
 ```
 id = {task_id}
 result = {string_of_image_bytes from image_builder}
+created_on = {str(datetime.now())}
 ```
 
 then worker pops the current tasks from it's FIFO list and begins looking for new tasks again

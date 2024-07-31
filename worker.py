@@ -39,15 +39,12 @@ def push_result(db: sqlite3.Connection, task_id: str, result: str):
         INSERT INTO RESULTS
         VALUES (?, ?, ?)
         """,
-        (task_id, result, datetime.datetime.now())
+        (task_id, result, str(datetime.datetime.now()))
         )
     cur.close()
     db.commit()
 
-def main():
-
-    # assuming TASKS table already exists
-    db = sqlite3.connect(DATABASE)
+def main(db: sqlite3.Connection):
     tasks = deque()
     while True:
         sleep(1)
@@ -103,20 +100,8 @@ def main():
         tasks.popleft()
 
 
-
-
-        # # run current task
-        # result, data = run_task(tasks[0])
-        # curr_task = tasks.popleft()
-
-        # # task is complete update TASKS table
-        # if not result:
-        #     # push error to TASKS table
-        #     continue
-        # update_task_status(db, curr_task[0], 'COMPLETE')
-
-        # push result to RESULTS table
-
-
 if __name__ == '__main__':
+    db = sqlite3.connect(DATABASE)
+    db.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
+    db.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
     main()
