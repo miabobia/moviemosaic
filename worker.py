@@ -4,6 +4,12 @@ Background worker that will check/execute tasks in database
 import sqlite3
 import os
 from collections import deque
+from time import sleep
+from fetch_data import MovieCellBuilder
+from image_builder import build
+import datetime
+import io
+import base64
 
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
 
@@ -15,17 +21,28 @@ def get_new_tasks(db: sqlite3.Connection) -> list:
     cur.close()
     return rows
 
-def update_task_status(db: sqlite3.Connection, task_id: str, status: str, error_msg: str = None):
-    if error_msg:
-        # put error message here
-        pass
-    cur = db.execute("UPDATE TASKS SET STATUS = ? WHERE ID = ?", (status, task_id))
+def update_task_status(db: sqlite3.Connection, task_id: str, status: str, error_msg: str = 'NULL'):
+
+    cur = db.execute(
+        """UPDATE TASKS 
+        SET STATUS = ?,
+        ERROR_MSG = ?
+        WHERE ID = ?""",
+        (status, task_id, error_msg))
+
     cur.close()
     db.commit()
 
-def run_task(task: str) -> (bool, any):
-    # match case to interpret what task to be run?
-    pass
+def push_result(db: sqlite3.Connection, task_id: str, result: str):
+    cur = db.execute(
+        """
+        INSERT INTO RESULTS
+        VALUES (?, ?, ?)
+        """,
+        (task_id, result, datetime.datetime.now())
+        )
+    cur.close()
+    db.commit()
 
 def main():
 
@@ -33,6 +50,7 @@ def main():
     db = sqlite3.connect(DATABASE)
     tasks = deque()
     while True:
+        sleep(1)
         # get new tasks
         new_tasks = get_new_tasks(db)
 
@@ -44,16 +62,58 @@ def main():
         # see if any tasks exist
         if not tasks:
             continue
+        
+        # task is starting to we change its status immediately to reflect change on front end
+        update_task_status(db, tasks[0][0], 'COLLECTING DATA')
 
-        # run current task
-        result, data = run_task(tasks[0])
-        curr_task = tasks.popleft()
+        # 
+        movie_cell_builder = MovieCellBuilder(
+            username = tasks[0][1],
+            mode = int(tasks[0][2])
+        )
 
-        # task is complete update TASKS table
-        if not result:
-            # push error to TASKS table
+        status, err = movie_cell_builder.get_status()
+
+        # username is no good
+        if not status:
+            update_task_status(db, tasks[0][0], 'ERROR', err)
+            tasks.popleft()
             continue
-        update_task_status(db, curr_task[0], 'COMPLETE')
+
+        movie_cells = movie_cell_builder.build_cells()
+        image = build(
+            movie_cells=movie_cells,
+            username=tasks[0][1],
+            config_path='config.json',
+            last_watch_date=movie_cell_builder.get_last_movie_date()
+            )
+        
+        # image has been built now we need to store it in RESULTS table
+        buffer = io.BytesIO()
+        image.save(buffer, format='PNG')
+        buffer.seek(0)
+        image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
+        push_result(db, task[0][0], image_string)
+
+
+        # mark task as complete
+        update_task_status(db, tasks[0][0], 'COMPLETE')
+
+        # remove task from queue
+        tasks.popleft()
+
+
+
+
+        # # run current task
+        # result, data = run_task(tasks[0])
+        # curr_task = tasks.popleft()
+
+        # # task is complete update TASKS table
+        # if not result:
+        #     # push error to TASKS table
+        #     continue
+        # update_task_status(db, curr_task[0], 'COMPLETE')
 
         # push result to RESULTS table
 

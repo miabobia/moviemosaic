@@ -135,3 +135,51 @@ while True:
 front.py in production wouldn't be on a while loop it would be constantly run via flask's event loop. 
 Then we could constantly be checking the results table and tasks table to provide progress updates.
 ```input('step')``` was placed there just so i could test in real time since tasks would be done too quickly in this env
+
+
+Order of operations
+
+server gets username
+server gets a mode
+server generates a task_id = uuid
+server creates movie_cell_builder task in TASKS
+```
+ID = {task_id}
+USER = {username}
+MODE = {mode}
+PROGRESS_MSG = COLLECTING DATA
+STATUS = READY
+ERROR_MSG = NULL
+```
+server redirects to /tasks/{task_id}
+
+task_id fetches all rows in TASKS where id = {task_id} AND STATUS = 'IN PROGRESS'
+(should only be one task because worker only takes one task at a time)
+/tasks/{task_id} displays message from the selected row's PROGRESS_MSG
+once there is no more rows with {task_id} we redirect to /user/{username}
+user/username displays an image from RESULTS where its id == {task_id}
+
+alternatively if the current task gets an ERROR status then we redirect to /main with an error message parameter
+
+
+
+worker constantly checks for new rows in TASKS with STATUS = READY
+
+worker sees new tasks created by server.py
+worker handles tasks in FIFO
+worker updates all new tasks to QUEUED status
+worker updates the PROGRESS_MSG of the current task
+
+worker does the task (scrapes data, creates_mosaic)
+
+worker marks task as COMPLETE or ERROR and updates the progress_msg and ERROR_MSG field accordingly
+
+if both tasks get to COMPLETE status then worker writes a new row to the RESULTS table
+
+```
+id = {task_id}
+result = {string_of_image_bytes from image_builder}
+```
+
+then worker pops the current tasks from it's FIFO list and begins looking for new tasks again
+
