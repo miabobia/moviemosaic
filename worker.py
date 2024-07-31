@@ -23,25 +23,23 @@ def get_new_tasks(db: sqlite3.Connection) -> list:
 
 def update_task_status(db: sqlite3.Connection, task_id: str, status: str, error_msg: str = 'NULL'):
 
-    cur = db.execute(
+    db.execute(
         """UPDATE TASKS 
         SET STATUS = ?,
         ERROR_MSG = ?
         WHERE ID = ?""",
         (status, task_id, error_msg))
 
-    cur.close()
     db.commit()
 
 def push_result(db: sqlite3.Connection, task_id: str, result: str):
-    cur = db.execute(
+    db.execute(
         """
         INSERT INTO RESULTS
         VALUES (?, ?, ?)
         """,
         (task_id, result, str(datetime.datetime.now()))
         )
-    cur.close()
     db.commit()
 
 def main(db: sqlite3.Connection):
