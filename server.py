@@ -38,8 +38,6 @@ def get_db():
         # create table if it does not exist
         # db.execute("create table if not exists hits (x int)")
         cur = db.cursor()
-        cur.execute('DROP TABLE IF EXISTS TASKS')
-        cur.execute('DROP TABLE IF EXISTS RESULTS')
         cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
         cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
         cur.close()
@@ -221,7 +219,6 @@ def task_page(task_id: str):
     screen for displaying progress updates on the current task.
     task should be pushed to db before this is called.
     '''
-    time.sleep(2)
 
     cur = get_db().cursor()
     cur.execute(f"""
