@@ -272,7 +272,7 @@ def get_result(task_id: str) -> str:
     cur = get_db().cursor()
     cur.execute("""
     SELECT RESULT FROM RESULTS WHERE ID = ?
-    """, (task_id))
+    """, (task_id,))
 
     result = cur.fetchone()
     cur.close()
