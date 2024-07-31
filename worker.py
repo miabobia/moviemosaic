@@ -16,7 +16,7 @@ DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqli
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
-    cur = db.execute("SELECT * FROM TASKS WHERE STATUS = ?", ("READY"))
+    cur = db.execute("SELECT * FROM TASKS WHERE STATUS = ?", ("READY",))
     rows = cur.fetchall()
     cur.close()
     return rows
