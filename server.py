@@ -224,7 +224,7 @@ def task_page(task_id: str):
     cur = get_db().cursor()
     cur.execute(f"""
     SELECT STATUS, PROGRESS_MSG, USER FROM TASKS WHERE ID = ?
-    """, (task_id))
+    """, (task_id,))
     task = cur.fetchone()
     cur.close()
     if task:
