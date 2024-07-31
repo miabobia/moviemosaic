@@ -272,12 +272,15 @@ def start_task(user: str, mode: int) -> str:
 def get_result(task_id: str) -> str:
     cur = get_db().cursor()
     cur.execute("""
-    SELECT RESULT FROM RESULTS WHERE ID = ?
+    SELECT * FROM RESULTS WHERE ID = ?
     """, (task_id,))
 
-    result = cur.fetchone()
+    result_row = cur.fetchone()
     cur.close()
-    return result[0]
+
+    id, result, time = result_row
+
+    return result
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8080, debug=True)
