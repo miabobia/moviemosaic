@@ -221,7 +221,7 @@ def task_page(task_id: str):
     screen for displaying progress updates on the current task.
     task should be pushed to db before this is called.
     '''
-    time.sleep(10)
+    time.sleep(2)
 
     cur = get_db().cursor()
     cur.execute(f"""
@@ -243,7 +243,7 @@ def task_page(task_id: str):
         # task still loading
         return(render_template('task_page.html', progress_msg=progress_msg))
     else:
-        return redirect(url_for('main_form'))
+        return redirect(url_for('main_form', error_message=f'TASK: {task} | TASK_ID: {task_id}'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
 
 @app.route('/userrr/<string:username>/<string:task_id>')
