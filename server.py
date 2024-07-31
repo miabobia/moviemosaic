@@ -238,7 +238,7 @@ def task_page(task_id: str):
             return render_template('main_form.html', error_message=err)
 
         # task still loading
-        return(render_template('task_page.html', progress_msg=progress_msg))
+        return(render_template('task_page.html', progress_msg=f'{status} - {progress_msg}'))
     else:
         return redirect(url_for('main_form', error_message=f'TASK: {task} | TASK_ID: {task_id}'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
