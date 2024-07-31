@@ -264,7 +264,6 @@ def start_task(user: str, mode: int) -> str:
         """,
         (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
     )
-    # cur.close()
     get_db().commit()
     return task_id
 
