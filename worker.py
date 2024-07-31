@@ -21,14 +21,15 @@ def get_new_tasks(db: sqlite3.Connection) -> list:
     cur.close()
     return rows
 
-def update_task_status(db: sqlite3.Connection, task_id: str, status: str, error_msg: str = 'NULL'):
+def update_task_status(db: sqlite3.Connection, task_id: str, status: str, progress_msg: str, error_msg: str = 'NULL'):
 
     db.execute(
         """UPDATE TASKS 
         SET STATUS = ?,
+        PROGRESS_MSG = ?,
         ERROR_MSG = ?
         WHERE ID = ?""",
-        (status, error_msg, task_id))
+        (status, progress_msg, error_msg, task_id))
 
     db.commit()
 
@@ -52,14 +53,14 @@ def main(db: sqlite3.Connection):
         # set status of all new tasks to queued
         for task in new_tasks:
             tasks.append(task)
-            update_task_status(db, task[0], 'QUEUED')
+            update_task_status(db, task[0], 'QUEUED', 'WAITING')
 
         # see if any tasks exist
         if not tasks:
             continue
         
         # task is starting to we change its status immediately to reflect change on front end
-        update_task_status(db, tasks[0][0], 'COLLECTING DATA')
+        update_task_status(db, tasks[0][0], 'COLLECTING DATA', 'COLLECTING DATA')
 
         # 
         movie_cell_builder = MovieCellBuilder(
@@ -71,14 +72,14 @@ def main(db: sqlite3.Connection):
 
         # username is no good
         if not status:
-            update_task_status(db, tasks[0][0], 'ERROR', err)
+            update_task_status(db, tasks[0][0], 'ERROR', 'ERROR', err)
             tasks.popleft()
             continue
 
         movie_cells = movie_cell_builder.build_cells()
 
         # task is building image now
-        update_task_status(db, tasks[0][0], 'BUILDING MOSAIC')
+        update_task_status(db, tasks[0][0], 'BUILDING MOSAIC', 'BUILDING MOSAIC')
         image = build(
             movie_cells=movie_cells,
             username=tasks[0][1],
@@ -96,7 +97,7 @@ def main(db: sqlite3.Connection):
 
 
         # mark task as complete
-        update_task_status(db, tasks[0][0], 'COMPLETE')
+        update_task_status(db, tasks[0][0], 'COMPLETE', 'MOSAIC FINISHED')
 
         # remove task from queue
         tasks.popleft()

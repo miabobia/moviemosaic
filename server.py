@@ -222,23 +222,23 @@ def task_page(task_id: str):
 
     cur = get_db().cursor()
     cur.execute(f"""
-    SELECT STATUS, PROGRESS_MSG, USER FROM TASKS WHERE ID = ?
+    SELECT STATUS, PROGRESS_MSG, USER, ERROR_MSG FROM TASKS WHERE ID = ?
     """, (task_id,))
 
     task = cur.fetchone()
     cur.close()
     if task:
-        status, progress_msg, username = task
+        status, progress_msg, username, error_msg = task
 
         if status == 'COMPLETE':
             # result has been pushed by worker
             # redirect to page to show user the image_string
             return redirect(url_for('dynamic_page2', username=username, task_id=task_id))
         elif status == 'ERROR':
-            return render_template('main_form.html', error_message=err)
+            return render_template('main_form.html', error_message=error_msg)
 
         # task still loading
-        return(render_template('task_page.html', progress_msg=f'{status} - {progress_msg}'))
+        return(render_template('task_page.html', progress_msg=progress_msg'))
     else:
         return redirect(url_for('main_form', error_message=f'TASK: {task} | TASK_ID: {task_id}'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
