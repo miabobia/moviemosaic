@@ -109,4 +109,4 @@ if __name__ == '__main__':
     cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
     cur.commit()
     cur.close()
-    main()
+    main(db)

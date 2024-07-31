@@ -13,6 +13,8 @@
                     "destinationPath": "/sqlitedata"
                 }
             ]
+        }, "worker": {
+            "command": "python worker.py"
         }
     }
 }
