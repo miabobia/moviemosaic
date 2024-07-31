@@ -221,7 +221,7 @@ def task_page(task_id: str):
     screen for displaying progress updates on the current task.
     task should be pushed to db before this is called.
     '''
-    time.sleep(2)
+    time.sleep(10)
 
     cur = get_db().cursor()
     cur.execute(f"""
