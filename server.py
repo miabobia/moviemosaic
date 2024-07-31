@@ -257,14 +257,14 @@ def start_task(user: str, mode: int) -> str:
 
     task_id = str(uuid4())
 
-    cur = get_db().execute(
+    get_db().execute(
         """
         INSERT INTO TASKS 
         VALUES (?, ?, ?, ?, ?, ?)
         """,
         (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
     )
-    cur.close()
+    # cur.close()
     get_db().commit()
     return task_id
 
