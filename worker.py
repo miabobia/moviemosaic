@@ -92,7 +92,7 @@ def main(db: sqlite3.Connection):
         buffer.seek(0)
         image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
        # push_result(db, task[0][0], image_string)
-        push_result(db, task_id, 'test')
+        push_result(db, tasks[0][0], image_string)
 
 
         # mark task as complete
