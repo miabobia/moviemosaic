@@ -15,6 +15,7 @@ from flask_session import Session
 from bleach import clean
 import sqlite3
 from uuid import uuid4
+import time
 # ===============================================
 
 app = Flask(__name__)
@@ -220,6 +221,7 @@ def task_page(task_id: str):
     screen for displaying progress updates on the current task.
     task should be pushed to db before this is called.
     '''
+    time.sleep(2)
 
     cur = get_db().cursor()
     cur.execute(f"""
@@ -241,7 +243,7 @@ def task_page(task_id: str):
         # task still loading
         return(render_template('task_page.html', progress_msg=progress_msg))
     else:
-        return redirect(url_for('main_page'))
+        return redirect(url_for('main_form'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
 
 @app.route('/userrr/<string:username>/<string:task_id>')
