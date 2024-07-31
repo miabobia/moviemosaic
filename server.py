@@ -225,7 +225,7 @@ def task_page(task_id: str):
     cur.execute(f"""
     SELECT STATUS, PROGRESS_MSG, USER FROM TASKS WHERE ID = ?
     """, (task_id,))
-    
+
     task = cur.fetchone()
     cur.close()
     if task:
@@ -240,6 +240,8 @@ def task_page(task_id: str):
 
         # task still loading
         return(render_template('task_page.html', progress_msg=progress_msg))
+    else:
+        return redirect(url_for('main_page'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
 
 @app.route('/userrr/<string:username>/<string:task_id>')
