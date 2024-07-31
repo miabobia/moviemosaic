@@ -75,6 +75,9 @@ def main(db: sqlite3.Connection):
             tasks.popleft()
             continue
 
+        # task is building image now
+        update_task_status(db, tasks[0][0], 'BUILDING MOSAIC')
+
         movie_cells = movie_cell_builder.build_cells()
         image = build(
             movie_cells=movie_cells,
