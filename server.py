@@ -36,9 +36,13 @@ def get_db():
         db = g._database = sqlite3.connect(DATABASE)
         # create table if it does not exist
         # db.execute("create table if not exists hits (x int)")
-        db.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
-        db.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
-        
+        cur = db.cursor()
+        cur.execute('DROP TABLE IF EXISTS TASKS')
+        cur.execute('DROP TABLE IF EXISTS RESULTS')
+        cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
+        cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
+        cur.commit()
+        cur.close()
     return db
 
 
@@ -259,8 +263,8 @@ def start_task(user: str, mode: int) -> str:
         """,
         (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
     )
-    cur.close()
     cur.commit()
+    cur.close()
     return task_id
 
 def get_result(task_id: str) -> str:
