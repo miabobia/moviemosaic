@@ -28,7 +28,7 @@ def update_task_status(db: sqlite3.Connection, task_id: str, status: str, error_
         SET STATUS = ?,
         ERROR_MSG = ?
         WHERE ID = ?""",
-        (status, task_id, error_msg))
+        (status, error_msg, task_id))
 
     db.commit()
 
