@@ -35,7 +35,7 @@ Session(app)
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE)
+        db = g._database = sqlite3.connect(DATABASE, timeout=10)
         cur = db.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
         cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
@@ -53,7 +53,7 @@ def close_connection(exception):
 def download_image(username: str, task_id: str):
 
     image_string = get_result(task_id)
-    if not image_string:
+    if image_string is None:
         redirect(url_for('main_form'))
 
     # render page with generated image_string
@@ -112,7 +112,7 @@ def dynamic_page(username: str, task_id: str):
     displays image_string from RESULTS table in db after task complete
     '''
     image_string = get_result(task_id=task_id)
-    if not image_string:
+    if image_string is None:
         redirect(url_for('main_form'))
     download_url = url_for('download_image', username=username, task_id=task_id)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
@@ -151,10 +151,10 @@ def get_result(task_id: str) -> str:
     result_row = cur.fetchone()
     cur.close()
 
-    if not result_row:
+    if result_row is None:
         return None
 
-    id, result, time = result_row
+    _, result, _ = result_row
 
     return result
 

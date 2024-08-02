@@ -18,9 +18,11 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 - change right side of image so it resizes based on max text length
 - change font?
 
-- figure out how to have data persist on server. Setting in disco.json i tried crashed server, but maybe syntax err?
 - clean up server.py it is functional but lots of old code in there needs to be pruned. change pages so they follow correct convention eg (/userrr/ -> /user/)
-- implement cleanup on the database. might need to add datetime stamps on TASKS table and not just RESULTS table
-    - working on this but running into issues using crons. tasks will hang forever when this happens
+- refactor cleanup on the database. try to make it into a cron intstead of worker process
+    - need to figure out how to deal with locking errors. adding retries and timeouts might be the move
+    - make sure every task has an entry in the results table even if it is an error
+    - janitor should only be deleting tasks that have a complete or ERROR status. should never delete something in progress
+
 - figure out how to implement flashes to display errors
 - add gifs for progress messages? make progress messages display on main page instead of redirecting to loading screen?
