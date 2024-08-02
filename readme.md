@@ -21,5 +21,6 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 - figure out how to have data persist on server. Setting in disco.json i tried crashed server, but maybe syntax err?
 - clean up server.py it is functional but lots of old code in there needs to be pruned. change pages so they follow correct convention eg (/userrr/ -> /user/)
 - implement cleanup on the database. might need to add datetime stamps on TASKS table and not just RESULTS table
+    - working on this but running into issues using crons. tasks will hang forever when this happens
 - figure out how to implement flashes to display errors
 - add gifs for progress messages? make progress messages display on main page instead of redirecting to loading screen?
