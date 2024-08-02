@@ -51,38 +51,38 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-@app.route('/user/<string:username>')
-# @profile_function('dynamic_page_profile.pstat')
-def dynamic_page(username: str):
+# @app.route('/user/<string:username>')
+# # @profile_function('dynamic_page_profile.pstat')
+# def dynamic_page(username: str):
 
-    username = clean(username)
+#     username = clean(username)
 
-    # see if serving image to user is possible
-    movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
-    movie_cell_builder: MovieCellBuilder
-    if not movie_cell_builder_dict:
-        # this means user went directly to this page instead of through homepage
-        movie_cell_builder = create_movie_cell_builder(username=username)
-    else:
-        movie_cell_builder = rebuild_movie_cell_builder(username=username)
+#     # see if serving image to user is possible
+#     movie_cell_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
+#     movie_cell_builder: MovieCellBuilder
+#     if not movie_cell_builder_dict:
+#         # this means user went directly to this page instead of through homepage
+#         movie_cell_builder = create_movie_cell_builder(username=username)
+#     else:
+#         movie_cell_builder = rebuild_movie_cell_builder(username=username)
 
-    # movie_cell_builder exists now
-    # check the state
-    status, err = movie_cell_builder.get_status()
-    if not status:
-        # data from username is no good so we go back to homepage with error message
-        return render_template('main_form.html', error_message=err)
-    else:
-        # put movie_cell_builder in session (could be overwriting duplicate data if session was already good)
-        session[f'{username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
+#     # movie_cell_builder exists now
+#     # check the state
+#     status, err = movie_cell_builder.get_status()
+#     if not status:
+#         # data from username is no good so we go back to homepage with error message
+#         return render_template('main_form.html', error_message=err)
+#     else:
+#         # put movie_cell_builder in session (could be overwriting duplicate data if session was already good)
+#         session[f'{username}_MovieCellBuilder'] = movie_cell_builder.to_dict()
 
-    # username is viable so we load image_string into session
-    create_mosaic(username=username)
+#     # username is viable so we load image_string into session
+#     create_mosaic(username=username)
 
-    # render page with generated image_string
-    image_string = session.get(f'{username}_image_string')
-    download_url = url_for('download_image', username=username)
-    return render_template('dynamic_page.html', image=image_string, download_url=download_url)
+#     # render page with generated image_string
+#     image_string = session.get(f'{username}_image_string')
+#     download_url = url_for('download_image', username=username)
+#     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
 @app.route('/download/<string:username>')
 def download_image(username: str):
@@ -156,62 +156,62 @@ def main_form():
 
     # return redirect(url_for('dynamic_page', username=submitted_username))
 
-# @profile_function('create_mosaic.pstat')
-def create_mosaic(username: str):
-    '''
-    Pushes Movie Mosaic image based on username into session.
-    Only called if viable movie_cell_builder in session.
-    '''
+# # @profile_function('create_mosaic.pstat')
+# def create_mosaic(username: str):
+#     '''
+#     Pushes Movie Mosaic image based on username into session.
+#     Only called if viable movie_cell_builder in session.
+#     '''
 
-    if session.get(f'{username}_image_string', None):
-        return
+#     if session.get(f'{username}_image_string', None):
+#         return
     
-    mv_builder = rebuild_movie_cell_builder(username=username)
-    movie_cells = mv_builder.build_cells()
-    last_watched_date = mv_builder.get_last_movie_date()
+#     mv_builder = rebuild_movie_cell_builder(username=username)
+#     movie_cells = mv_builder.build_cells()
+#     last_watched_date = mv_builder.get_last_movie_date()
 
-    buffer = io.BytesIO()
-    image = build(movie_cells, username, 'config.json', last_watch_date=last_watched_date)
-    image.save(buffer, format='PNG')
-    buffer.seek(0)
-    image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
-    session[f'{username}_image_string'] = image_string
+#     buffer = io.BytesIO()
+#     image = build(movie_cells, username, 'config.json', last_watch_date=last_watched_date)
+#     image.save(buffer, format='PNG')
+#     buffer.seek(0)
+#     image_string = base64.b64encode(buffer.getvalue()).decode('utf-8')
+#     session[f'{username}_image_string'] = image_string
 
-# @profile_function('create_movie_cell_builder.pstat')
-def create_movie_cell_builder(username: str, mode: int = 0) -> MovieCellBuilder:
-    return MovieCellBuilder(
-        username=username,
-        mode=mode
-    )
-def get_movie_cell_builder_status(movie_cell_builder: MovieCellBuilder) -> tuple[bool, str]:
-    return movie_cell_builder.get_status()
+# # @profile_function('create_movie_cell_builder.pstat')
+# def create_movie_cell_builder(username: str, mode: int = 0) -> MovieCellBuilder:
+#     return MovieCellBuilder(
+#         username=username,
+#         mode=mode
+#     )
+# def get_movie_cell_builder_status(movie_cell_builder: MovieCellBuilder) -> tuple[bool, str]:
+#     return movie_cell_builder.get_status()
 
-# @profile_function('rebuild.pstat')
-def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
-    '''
-    Takes in username and builds MovieCellBuilder based on current session.
-    Only call when movie_cell_bulider exists in session!!
-    '''
-    mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
+# # @profile_function('rebuild.pstat')
+# def rebuild_movie_cell_builder(username: str) -> MovieCellBuilder:
+#     '''
+#     Takes in username and builds MovieCellBuilder based on current session.
+#     Only call when movie_cell_bulider exists in session!!
+#     '''
+#     mv_builder_dict = session.get(f'{username}_MovieCellBuilder', None)
 
-    builder = MovieCellBuilder(
-        username=mv_builder_dict['_username'],
-        mode=mv_builder_dict['_mode'],
-        status=mv_builder_dict['_status'],
-        movie_data=mv_builder_dict['_movie_data']
-    )
-    return builder
+#     builder = MovieCellBuilder(
+#         username=mv_builder_dict['_username'],
+#         mode=mv_builder_dict['_mode'],
+#         status=mv_builder_dict['_status'],
+#         movie_data=mv_builder_dict['_movie_data']
+#     )
+#     return builder
 
-def db_test(username: str):
-    get_db().execute(f"""INSERT INTO TASKS(id, action, progress_msg, status, error_msg)
-                     VALUES (?, ?, ?, ?, ?);""", ('hello_world', username + '_create_mosaic', 'NOT STARTED', 'WAITING', 'NULL'))
-    get_db().commit()
+# def db_test(username: str):
+#     get_db().execute(f"""INSERT INTO TASKS(id, action, progress_msg, status, error_msg)
+#                      VALUES (?, ?, ?, ?, ?);""", ('hello_world', username + '_create_mosaic', 'NOT STARTED', 'WAITING', 'NULL'))
+#     get_db().commit()
 
-    cur = get_db().execute("SELECT * FROM TASKS")
-    res = cur.fetchall()
-    cur.close()
-    for row in res:
-        print(row)
+#     cur = get_db().execute("SELECT * FROM TASKS")
+#     res = cur.fetchall()
+#     cur.close()
+#     for row in res:
+#         print(row)
 
 @app.route('/task/<string:task_id>')
 def task_page(task_id: str):
@@ -243,8 +243,8 @@ def task_page(task_id: str):
         return redirect(url_for('main_form', error_message=f'TASK: {task} | TASK_ID: {task_id}'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg
 
-@app.route('/userrr/<string:username>/<string:task_id>')
-def dynamic_page2(username: str, task_id: str):
+@app.route('/user/<string:username>/<string:task_id>')
+def dynamic_page(username: str, task_id: str):
     '''
     displays image_string from RESULTS table in db after task complete
     '''
