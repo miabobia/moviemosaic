@@ -48,15 +48,15 @@ def remove_expired_tasks(db: sqlite3.Connection):
 
     # make list of task_ids to delete that sqlite3 can parse
     placeholders = ','.join(['?'] * len(expired_ids))
-    db.execute("""
+    db.execute(f"""
         DELETE FROM TASKS
-        WHERE ID IN (?)
-    """, placeholders)
+        WHERE ID IN ({placeholders})
+    """, expired_ids)
 
-    db.execute("""
+    db.execute(f"""
         DELETE FROM RESULTS
-        WHERE ID IN (?)
-    """, placeholders)
+        WHERE ID IN ({placeholders})
+    """, expired_ids)
 
     db.commit()
 
