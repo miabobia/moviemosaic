@@ -1,7 +1,15 @@
+# ===========ENVIRONMENT=IMPORTS===========
+
 import os
 from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
+if os.path.isfile('.env'):
+    DATABASE = "./sqlitedata/database.sqlite3"
+else:
+    DATABASE = "/sqlitedata/database.sqlite3"
+# =========================================
+
 from datetime import datetime
 from fetch_data import MovieCellBuilder
 from image_builder import build
@@ -16,27 +24,18 @@ from bleach import clean
 import sqlite3
 from uuid import uuid4
 import time
-# ===============================================
 
+# setting up flask app
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
-if os.path.isfile('.env'):
-    DATABASE = "./sqlitedata/database.sqlite3"
-else:
-    DATABASE = "/sqlitedata/database.sqlite3"
-
-# ===============================================
-
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
         db = g._database = sqlite3.connect(DATABASE)
-        # create table if it does not exist
-        # db.execute("create table if not exists hits (x int)")
         cur = db.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
         cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
@@ -64,7 +63,6 @@ def download_image(username: str, task_id: str):
     return send_file(buffer, as_attachment=True, download_name=f'{username}.png', mimetype='image/png/')
 
 @app.route('/', methods=['GET', 'POST'])
-# @profile_function('main_form.pstat')
 def main_form():
     if request.method == 'GET':
         return render_template('main_form.html')
