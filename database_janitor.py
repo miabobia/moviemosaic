@@ -50,15 +50,7 @@ def remove_expired_tasks(db: sqlite3.Connection):
     if not expired_ids:
         return 0
 
-    ret_str = '('
-    # sloppy but join not working and im tired
-    for i in range(len(expired_ids)):
-        if i != len(expired_ids) - 1:
-            ret_str += '?,'
-        else:
-            ret_str += '?)'
-    # make list of task_ids to delete that sqlite3 can parse
-    placeholders = tuple(','.join(['?'] * len(expired_ids)))
+    placeholders = ','.join('?' for _ in expired_ids)
     db.execute(f"""
         DELETE FROM TASKS
         WHERE ID IN {ret_str}
