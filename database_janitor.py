@@ -22,6 +22,7 @@ def get_results(db: sqlite3.Connection):
         )
     rows = cur.fetchall()
     cur.close()
+    return rows
 
 def get_expired_tasks(db: sqlite3.Connection) -> list:
     '''
