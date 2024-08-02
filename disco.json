@@ -25,7 +25,8 @@
                     "destinationPath": "/images"
                 }
             ]
-        }, "minutecron": {
+        },
+        "minutecron": {
             "type": "cron",
             "schedule": "* * * * *",
             "command": "python database_janitor.py"

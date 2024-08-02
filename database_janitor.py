@@ -1,5 +1,5 @@
 '''
-database_janitor -> 👱‍♀️🧹
+database_janitor -> emoji was here
 cleans up the shared sqlite3 database
 '''
 
