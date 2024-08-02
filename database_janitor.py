@@ -73,7 +73,7 @@ def main(db: sqlite3.Connection):
         remove_expired_tasks(db)
 
 if __name__ == '__main__':
-    # db = sqlite3.connect(DATABASE)
+    db = sqlite3.connect(DATABASE)
     # remove_expired_tasks(db)
     # db.commit()
     main(db)
