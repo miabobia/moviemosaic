@@ -66,3 +66,15 @@ if __name__ == '__main__':
     db = sqlite3.connect(DATABASE)
     # remove_expired_tasks(db)
     # db.close()
+
+# }, "minutecron": {
+#     "type": "cron",
+#     "schedule": "* * * * *",
+#     "command": "python database_janitor.py",
+#     "volumes": [
+#         {
+#             "name": "sqlite-data",
+#             "destinationPath": "/sqlitedata"
+#         }
+#     ]
+# }
