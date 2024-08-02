@@ -28,13 +28,7 @@
         }, "minutecron": {
             "type": "cron",
             "schedule": "* * * * *",
-            "command": "python database_janitor.py",
-            "volumes": [
-                {
-                    "name": "sqlite-data",
-                    "destinationPath": "/sqlitedata"
-                }
-            ]
+            "command": "python database_janitor.py"
         }
     }
 }
