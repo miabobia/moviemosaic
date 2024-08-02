@@ -74,7 +74,13 @@ def main(db: sqlite3.Connection):
         remove_expired_tasks(db)
 
 if __name__ == '__main__':
+
     db = sqlite3.connect(DATABASE)
+    cur = db.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
+    cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
+    cur.close()
+    db.commit()
     # remove_expired_tasks(db)
     # db.commit()
     main(db)
