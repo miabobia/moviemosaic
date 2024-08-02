@@ -54,7 +54,7 @@ def download_image(username: str, task_id: str):
 
     image_string = get_result(task_id)
     if image_string is None:
-        redirect(url_for('main_form'))
+        return redirect(url_for('main_form'))
 
     # render page with generated image_string
     image_data = base64.b64decode(image_string)
@@ -113,7 +113,7 @@ def dynamic_page(username: str, task_id: str):
     '''
     image_string = get_result(task_id=task_id)
     if image_string is None:
-        redirect(url_for('main_form'))
+        return redirect(url_for('main_form'))
     download_url = url_for('download_image', username=username, task_id=task_id)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
