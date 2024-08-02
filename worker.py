@@ -7,7 +7,7 @@ from collections import deque
 from time import sleep
 from fetch_data import MovieCellBuilder
 from image_builder import build
-import datetime
+from datetime import datetime
 import io
 import base64
 
