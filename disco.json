@@ -26,9 +26,7 @@
                 }
             ]
         },
-        "minutecron": {
-            "type": "cron",
-            "schedule": "* * * * *",
+        "janitor": {
             "command": "python database_janitor.py",
             "volumes": [
                 {

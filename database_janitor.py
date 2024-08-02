@@ -66,10 +66,17 @@ def remove_expired_tasks(db: sqlite3.Connection):
 
     return len(expired_ids)
 
+def main(db: sqlite3.Connection):
+
+    while True:
+        sleep(1)
+        remove_expired_tasks(db)
+
 if __name__ == '__main__':
-    db = sqlite3.connect(DATABASE)
-    remove_expired_tasks(db)
-    db.commit()
+    # db = sqlite3.connect(DATABASE)
+    # remove_expired_tasks(db)
+    # db.commit()
+    main(db)
 
 # }, "minutecron": {
 #     "type": "cron",
