@@ -158,18 +158,6 @@ def get_result(task_id: str) -> str:
 
     return result
 
-def clear_data():
-    '''Clear all data from TASKS and RESULTS tables.'''
-    db = sqlite3.connect(DATABASE)
-    cur = db.cursor()
-    cur.execute("DROP TABLE IF EXISTS RESULTS;")
-    cur.execute("DROP TABLE IF EXISTS TASKS;")
-    cur.execute("CREATE TABLE TASKS(id TEXT PRIMARY KEY, user TEXT, mode INTEGER, progress_msg TEXT, status TEXT, error_msg TEXT)")
-    cur.execute("CREATE TABLE RESULTS(id TEXT PRIMARY KEY, result TEXT, created_on TEXT)")
-    db.commit()
-    cur.close()
-    db.close()
-
 if __name__ == "__main__":
     # clear_data()
     app.run(host="0.0.0.0", port=8080, debug=True)

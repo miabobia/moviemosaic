@@ -45,7 +45,7 @@ def get_expired_tasks(db: sqlite3.Connection) -> list:
             continue
     return expired_task_ids
 
-def remove_expired_tasks(db: sqlite3.Connection):
+def remove_expired_tasks(db: sqlite3.Connection) -> int:
     '''
     Removes all expired tasks from RESULTS and TASKS table
     returns how many expired id's were found (and hopefully removed)
