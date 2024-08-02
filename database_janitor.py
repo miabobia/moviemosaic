@@ -8,7 +8,7 @@ from datetime import datetime
 import os
 
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
-EXPIRY_TIME = 300 #43200 # how many seconds until result is expired
+EXPIRY_TIME = 120 #43200 # how many seconds until result is expired
 
 def get_results(db: sqlite3.Connection):
     '''
@@ -50,12 +50,12 @@ def remove_expired_tasks(db: sqlite3.Connection):
     placeholders = ','.join(['?'] * len(expired_ids))
     db.execute("""
         DELETE FROM TASKS
-        WHERE ID IN ?
+        WHERE ID IN (?)
     """, placeholders)
 
     db.execute("""
         DELETE FROM RESULTS
-        WHERE ID IN ?
+        WHERE ID IN (?)
     """, placeholders)
 
     db.commit()

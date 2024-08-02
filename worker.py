@@ -105,6 +105,7 @@ def main(db: sqlite3.Connection):
 
 
 if __name__ == '__main__':
+    # https://moviemosaic.org/user/shuval/d9a577be-2fef-4120-9a4a-ab464ff355b2
     db = sqlite3.connect(DATABASE)
     cur = db.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
