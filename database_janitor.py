@@ -6,8 +6,10 @@ cleans up the shared sqlite3 database
 import sqlite3
 from datetime import datetime
 import os
+
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
 EXPIRY_TIME = 300 #43200 # how many seconds until result is expired
+
 def get_results(db: sqlite3.Connection):
     '''
     Fetches all rows from RESULTS table.
@@ -62,5 +64,5 @@ def remove_expired_tasks(db: sqlite3.Connection):
 
 if __name__ == '__main__':
     db = sqlite3.connect(DATABASE)
-    remove_expired_tasks(db)
+    # remove_expired_tasks(db)
     db.close()
