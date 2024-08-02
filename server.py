@@ -233,7 +233,7 @@ def task_page(task_id: str):
         if status == 'COMPLETE':
             # result has been pushed by worker
             # redirect to page to show user the image_string
-            return redirect(url_for('dynamic_page2', username=username, task_id=task_id))
+            return redirect(url_for('dynamic_page', username=username, task_id=task_id))
         elif status == 'ERROR':
             return render_template('main_form.html', error_message=error_msg)
 
@@ -249,7 +249,7 @@ def dynamic_page(username: str, task_id: str):
     displays image_string from RESULTS table in db after task complete
     '''
     image_string = get_result(task_id=task_id)
-    return render_template('dynamic_page2.html', image=image_string)
+    return render_template('dynamic_page.html', image=image_string)
 
 # TASKS(id, user, mode, progress_msg, status, error_msg)")
 def start_task(user: str, mode: int) -> str:
@@ -277,6 +277,9 @@ def get_result(task_id: str) -> str:
 
     result_row = cur.fetchone()
     cur.close()
+
+    if not result_row:
+        return None
 
     id, result, time = result_row
 
