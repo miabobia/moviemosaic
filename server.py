@@ -65,7 +65,8 @@ def download_image(username: str, task_id: str):
 @app.route('/', methods=['GET', 'POST'])
 def main_form():
     if request.method == 'GET':
-        return render_template('main_form.html')
+        count_message = num_of_rows()
+        return render_template('main_form.html', error_message=count_message)
     
     submitted_username = clean(request.form['username_submitted'])
     movie_mode = 0
@@ -116,11 +117,11 @@ def dynamic_page(username: str, task_id: str):
     download_url = url_for('download_image', username=username, task_id=task_id)
     return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
-def drop():
-    connect = sqlite3.connect(DATABASE)
-    connect.execute("DROP TABLE IF EXISTS RESULTS;")
-    connect.execute("DROP TABLE IF EXISTS TASKS;")
-    connect.commit()
+def num_of_rows():
+    cur = get_db().cursor()
+    cnt = cur.execute("SELECT COUNT(*) FROM TASKS")
+    cur.close()
+    return str(cnt[0])
 
 # TASKS(id, user, mode, progress_msg, status, error_msg)")
 def start_task(user: str, mode: int) -> str:
