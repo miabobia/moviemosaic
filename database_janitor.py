@@ -31,10 +31,11 @@ def get_expired_tasks(db: sqlite3.Connection) -> list:
     expired_task_ids = []
     if not results:
         return []
-    now = datetime.now().strftime('%Y-%m-%d')
+    now = datetime.now()
     for row in results:
         task_id, _, created_on = row
-        if now - created_on > EXPIRY_TIME:
+        created_date = datetime.strptime(created_on, '%Y-%m-%d %H:%M:%S')
+        if now - created_date > timedelta(seconds=EXPIRY_TIME):
             expired_task_ids.append(task_id)
     return expired_task_ids
 
