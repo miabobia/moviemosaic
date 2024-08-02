@@ -119,7 +119,8 @@ def dynamic_page(username: str, task_id: str):
 
 def num_of_rows():
     cur = get_db().cursor()
-    cnt = cur.execute("SELECT COUNT(*) FROM TASKS")
+    cur.execute("SELECT COUNT(*) FROM TASKS")
+    cnt = cur.fetchone()
     cur.close()
     return str(cnt[0])
 
