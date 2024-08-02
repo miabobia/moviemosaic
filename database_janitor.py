@@ -9,7 +9,7 @@ import os
 from time import sleep
 
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
-EXPIRY_TIME = 120 #43200 # how many seconds until result is expired
+EXPIRY_TIME = 300 #43200 # how many seconds until result is expired
 
 def get_results(db: sqlite3.Connection):
     '''
