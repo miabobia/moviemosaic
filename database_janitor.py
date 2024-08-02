@@ -47,6 +47,8 @@ def remove_expired_tasks(db: sqlite3.Connection):
     '''
 
     expired_ids = get_expired_tasks(db)
+    if not expired_ids:
+        return 0
 
     ret_str = '('
     # sloppy but join not working and im tired
