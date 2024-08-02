@@ -1,5 +1,5 @@
 '''
-databse_janitor -> 👱‍♀️🧹
+database_janitor -> 👱‍♀️🧹
 cleans up the shared sqlite3 database
 '''
 
@@ -21,25 +21,46 @@ def get_results(db: sqlite3.Connection):
     rows = cur.fetchall()
     cur.close()
 
-def get_expired_tasks(db: sqlite3.Connection, result_func: function) -> list:
+def get_expired_tasks(db: sqlite3.Connection) -> list:
     '''
     Returns list of all task_id's that are expired
     '''
-    results = result_func(db)
+    results = get_results(db)
+    expired_task_ids = []
     if not results:
         return []
-    now = datetime.now()
+    now = datetime.now().strftime('%Y-%m-%d')
     for row in results:
         task_id, _, created_on = row
-    
+        if now - created_on > EXPIRY_TIME:
+            expired_task_ids.append(task_id)
+    return expired_task_ids
 
+def remove_expired_tasks(db: sqlite3.Connection):
+    '''
+    Removes all expired tasks from RESULTS and TASKS table
+    returns how many expired id's were found (and hopefully removed)
+    '''
 
-def main(db: sqlite3.Connection):
-    pass
+    expired_ids = get_expired_tasks(db)
 
+    # make list of task_ids to delete that sqlite3 can parse
+    placeholders = ','.join(['?'] * len(expired_ids))
+    db.execute("""
+        DELETE FROM TASKS
+        WHERE ID IN ?
+    """, placeholders)
 
+    db.execute("""
+        DELETE FROM RESULTS
+        WHERE ID IN ?
+    """, placeholders)
 
+    db.commit()
+
+    return len(expired_ids)
 
 if __name__ == '__main__':
     db = sqlite3.connect(DATABASE)
-    main(db)
+    remove_expired_tasks(db)
+    db.close()

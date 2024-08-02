@@ -34,12 +34,13 @@ def update_task_status(db: sqlite3.Connection, task_id: str, status: str, progre
     db.commit()
 
 def push_result(db: sqlite3.Connection, task_id: str, result: str):
+    now = datetime.now().strftime('%Y-%m-%d')
     db.execute(
         """
         INSERT INTO RESULTS
         VALUES (?, ?, ?)
         """,
-        (task_id, result, datetime.datetime.now())
+        (task_id, result, now)
         )
     db.commit()
 
