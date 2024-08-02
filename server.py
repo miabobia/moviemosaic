@@ -115,7 +115,8 @@ def dynamic_page(username: str, task_id: str):
     image_string = get_result(task_id=task_id)
     if not image_string:
         redirect(url_for('main_form'))
-    return render_template('dynamic_page.html', image=image_string)
+    download_url = url_for('download_image', username=username, task_id=task_id)
+    return render_template('dynamic_page.html', image=image_string, download_url=download_url)
 
 # TASKS(id, user, mode, progress_msg, status, error_msg)")
 def start_task(user: str, mode: int) -> str:
