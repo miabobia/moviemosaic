@@ -7,7 +7,7 @@ import sqlite3
 from datetime import datetime
 
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
-EXPIRY_TIME = 43200 # how many seconds until result is expired
+EXPIRY_TIME = 60 #43200 # how many seconds until result is expired
 def get_results(db: sqlite3.Connection):
     '''
     Fetches all rows from RESULTS table.
