@@ -1,3 +1,8 @@
+'''
+so i can remotely clear the tables using disco's cli run command
+USAGE: disco run --project moviemosaic "python refresh_tables.py"
+'''
+
 import sqlite3
 
 

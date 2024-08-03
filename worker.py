@@ -74,6 +74,7 @@ def main(db: sqlite3.Connection):
         # username is no good
         if not status:
             update_task_status(db, tasks[0][0], 'ERROR', 'ERROR', err)
+            push_result(db, tasks[0][0], 'NULL')
             tasks.popleft()
             continue
 
