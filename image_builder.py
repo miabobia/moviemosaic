@@ -128,7 +128,7 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
     thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
 
-    star_icons = [Image.open(f'{ICONS_DIR}/{fp}') for fp in ['full_rz.png', 'half_rz.png', 'empty_rz.png']]
+    star_icons = [Image.open(ICONS_DIR + fp) for fp in ['full_rz.png', 'half_rz.png', 'empty_rz.png']]
     
     build_rating_image(movie_cells[0], *star_icons)
 
