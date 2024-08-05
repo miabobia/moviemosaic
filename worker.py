@@ -13,6 +13,11 @@ from image_builder import build
 from datetime import datetime
 import io
 import base64
+import logging
+
+logging.basicConfig(filename='worker.log',
+                    level=logging.INFO,
+                    format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
@@ -59,6 +64,8 @@ def main(db: sqlite3.Connection):
         # see if any tasks exist
         if not tasks:
             continue
+
+        start_time = datetime.now()
         
         # task is starting to we change its status immediately to reflect change on front end
         update_task_status(db, tasks[0][0], 'COLLECTING DATA', "I'M COLLECTING DATA")
@@ -100,6 +107,9 @@ def main(db: sqlite3.Connection):
 
         # mark task as complete
         update_task_status(db, tasks[0][0], 'COMPLETE', 'ALL DONE!')
+
+        elapsed_time = datetime.now() - start_time
+        logging.info(f'task {tasks[0][0]} processed in {elapsed_time}')
 
         # remove task from queue
         tasks.popleft()
