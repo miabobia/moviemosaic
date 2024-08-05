@@ -16,7 +16,7 @@ import base64
 import logging
 
 logging.basicConfig(filename='worker.log',
-                    level=logging.INFO,
+                    level=logging.NOTSET,
                     format='%(asctime)s - %(levelname)s - %(message)s',
                     handlers=[
                         logging.FileHandler('worker.log'),  # Log to file
