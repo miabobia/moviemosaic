@@ -125,19 +125,6 @@ class Transformer:
 
         keep_indices = set([loc[0] for loc in title_locs.values()])
         return [item for index, item in enumerate(items) if index in keep_indices]
-        titles = map(get_movie_title, items)
-        for index, title in enumerate(titles):
-            if title in title_locs:
-                title_locs[title].append(index)
-            else:
-                title_locs[title] = [index]
-        indexes_to_remove = []
-        for title, loc in title_locs.items():
-            if len(loc) < 1: continue
-            indexes_to_remove.extend(loc[1:])
-            for index in loc[1:]:
-                items[index] = None
-        return list(filter(lambda x: x != None, items))
 
     def get_valid_movies(self):
         def is_movie(item) -> bool:
@@ -152,8 +139,6 @@ class Transformer:
         def has_watched_date(item) -> bool:
             watched_date = item.find('letterboxd:watchedDate')
             return not watched_date is None
-            watched_token = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))
-            return watched_token != ['None']
         
         def get_watched_date(item) -> datetime:
             date_val = item.find('letterboxd:watchedDate')
@@ -251,7 +236,6 @@ class Transformer:
             return (int((tmdb_id.string)), tmdb_type)
 
         return [get_tmdb_poster_url(id, t) for id, t in map(get_tmdb_id, self._movies)]
-        return list(map(get_tmdb_poster_url, map(get_tmdb_id, self._movies)))
 
     def valid_movies_exist(self) -> bool:
         return len(self._movies)
