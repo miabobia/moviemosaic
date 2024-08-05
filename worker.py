@@ -3,6 +3,9 @@ Background worker that will check/execute tasks in database
 '''
 import sqlite3
 import os
+from dotenv import load_dotenv
+if os.path.isfile('.env'):
+    load_dotenv('.env')
 from collections import deque
 from time import sleep
 from fetch_data import MovieCellBuilder
@@ -10,9 +13,6 @@ from image_builder import build
 from datetime import datetime
 import io
 import base64
-
-DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
-
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
@@ -54,14 +54,14 @@ def main(db: sqlite3.Connection):
         # set status of all new tasks to queued
         for task in new_tasks:
             tasks.append(task)
-            update_task_status(db, task[0], 'QUEUED', 'WAITING')
+            update_task_status(db, task[0], 'QUEUED', "I'M WAITING :/")
 
         # see if any tasks exist
         if not tasks:
             continue
         
         # task is starting to we change its status immediately to reflect change on front end
-        update_task_status(db, tasks[0][0], 'COLLECTING DATA', 'COLLECTING DATA')
+        update_task_status(db, tasks[0][0], 'COLLECTING DATA', "I'M COLLECTING DATA")
 
         # 
         movie_cell_builder = MovieCellBuilder(
@@ -73,7 +73,7 @@ def main(db: sqlite3.Connection):
 
         # username is no good
         if not status:
-            update_task_status(db, tasks[0][0], 'ERROR', 'ERROR', err)
+            update_task_status(db, tasks[0][0], 'ERROR', "I BROKE IT :(", err)
             push_result(db, tasks[0][0], 'NULL')
             tasks.popleft()
             continue
@@ -81,7 +81,7 @@ def main(db: sqlite3.Connection):
         movie_cells = movie_cell_builder.build_cells()
 
         # task is building image now
-        update_task_status(db, tasks[0][0], 'BUILDING MOSAIC', 'BUILDING MOSAIC')
+        update_task_status(db, tasks[0][0], 'BUILDING MOSAIC', "I'M BUILDING UR MOSAIC")
         image = build(
             movie_cells=movie_cells,
             username=tasks[0][1],
@@ -99,7 +99,7 @@ def main(db: sqlite3.Connection):
 
 
         # mark task as complete
-        update_task_status(db, tasks[0][0], 'COMPLETE', 'MOSAIC FINISHED')
+        update_task_status(db, tasks[0][0], 'COMPLETE', 'ALL DONE!')
 
         # remove task from queue
         tasks.popleft()
@@ -107,7 +107,7 @@ def main(db: sqlite3.Connection):
 
 if __name__ == '__main__':
     # https://moviemosaic.org/user/shuval/d9a577be-2fef-4120-9a4a-ab464ff355b2
-    db = sqlite3.connect(DATABASE)
+    db = sqlite3.connect(os.environ['DATABASE'])
     cur = db.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
     cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")

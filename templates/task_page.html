@@ -1,27 +1,86 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="refresh" content="5">
-    <title>Task Status</title>
-    <style>
-      body {
-        background-color: #f1beebfd; /* pastel pink */
-        text-align: center;
-        margin-top: 10%; /* 25% margin above the content */
-      }
-      .container {
-        background-color: #f1e2a3; /* light yellow */
-        padding: 20px;
-        border-radius: 10px;
-        display: inline-block;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <!-- <img src="data:image/png;base64,{{ image }}" alt="Generated Image">
-      <a href="{{ download_url }}">Download Image</a> -->
-      <h1>Task Status</h1>
-      <p>Current Progress: {{progress_msg}}</p>
+<head>
+  <meta http-equiv="refresh" content="5">
+  <title>Task Status</title>
+  <style>
+    body {
+      background-color: #f1beebfd; /* pastel pink */
+      text-align: center;
+      margin-top: 10%; /* Margin from the top of the screen */
+    }
+    .container {
+      background-color: #f1e2a3; /* light yellow */
+      padding: 20px;
+      border-radius: 10px;
+      display: inline-block;
+      text-align: center; /* Center the content */
+    }
+    .status-gif {
+      width: 250px; /* Fixed width */
+      height: 250px; /* Fixed height */
+      object-fit: cover; /* Ensures the GIF covers the area without distortion */
+      margin: 10px 0;
+    }
+    .comic-strip {
+      display: flex;
+      align-items: flex-start; /* Align items to the start of the container */
+      justify-content: center; /* Center items horizontally */
+      margin-bottom: 20px; /* Space between the comic strip and the GIF */
+    }
+    .emoji-cat {
+      font-size: 3em; /* Adjust size of the emoji */
+      margin-right: 10px; /* Space between the cat and the speech bubble */
+    }
+    .speech-bubble {
+      position: relative;
+      background: #fff; /* White background for the bubble */
+      border: 2px solid #f1e2a3; /* Light yellow border */
+      border-radius: 10px; /* Rounded corners */
+      padding: 10px 20px; /* Space inside the bubble */
+      width: 200px; /* Fixed width for the speech bubble */
+      text-align: left; /* Align text to the left inside the bubble */
+      max-width: 200px; /* Ensure it does not exceed the fixed width */
+    }
+    .speech-bubble::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: -15px; /* Position the triangle slightly to the left of the bubble */
+      margin-top: -10px; /* Center the triangle vertically */
+      border-width: 10px; /* Size of the triangle */
+      border-style: solid;
+      border-color: transparent #fff transparent transparent; /* Triangle pointing to the left */
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="comic-strip">
+      <div class="emoji-cat">
+        🐱🔧
+      </div>
+      <div class="speech-bubble">
+        <p>{{ progress_msg }}</p>
+      </div>
     </div>
-  </body>
+
+    <!-- Display GIF based on task status -->
+    {% if status == 'READY' %}
+      <img src="{{ url_for('static', filename='gifs/ready.gif') }}" alt="Ready" class="status-gif">
+    {% elif status == 'QUEUED' %}
+      <img src="{{ url_for('static', filename='gifs/queued.gif') }}" alt="Queued" class="status-gif">
+    {% elif status == 'COLLECTING DATA' %}
+      <img src="{{ url_for('static', filename='gifs/collecting.gif') }}" alt="Collecting Data" class="status-gif">
+    {% elif status == 'BUILDING MOSAIC' %}
+      <img src="{{ url_for('static', filename='gifs/mosaic.gif') }}" alt="Building Mosaic" class="status-gif">
+    {% elif status == 'COMPLETE' %}
+      <img src="{{ url_for('static', filename='gifs/complete.gif') }}" alt="Complete" class="status-gif">
+    {% elif status == 'ERROR' %}
+      <img src="{{ url_for('static', filename='gifs/error.gif') }}" alt="Error" class="status-gif">
+    {% else %}
+      <p>No status available</p>
+    {% endif %}
+  </div>
+</body>
 </html>

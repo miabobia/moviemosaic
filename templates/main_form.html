@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html>
   <head>
     <style>
@@ -6,38 +7,89 @@
         text-align: center;
         margin-top: 10%; /* 25% margin above the content */
       }
+      .wrapper {
+        width: 300px; /* Set the width you want */
+        margin: 0 auto; /* Center the wrapper */
+      }
       .logo-container {
         background-color: #f1e2a3; /* light yellow */
         margin-top: 10px; /* 10px margin from the top of the screen */
-        text-align: center;
+        padding: 5%; /* 5% padding around the logo */
+        box-sizing: border-box; /* Ensure padding is included in the total width */
+      }
+      .logo-container img {
+        border-radius: 10px; /* Rounded corners for the logo */
+        max-width: 100%; /* Ensure the image scales responsively */
+        height: auto; /* Maintain aspect ratio */
       }
       .container {
         background-color: #f1e2a3; /* light yellow */
         padding: 20px;
         border-radius: 10px;
-        display: inline-block;
         margin-top: 20px;
+        text-align: center; /* Ensure center alignment of contents */
+      }
+      input[type="text"], input[type="submit"], input[type="checkbox"] {
+        width: 100%; /* Make input elements take full width of the container */
+        box-sizing: border-box; /* Include padding and border in the element's total width */
+        margin-top: 10px; /* Add some space above input elements */
+      }
+      input[type="text"] {
+        padding: 10px; /* Add padding inside the text input */
+        border-radius: 5px; /* Rounded corners for the text input */
+      }
+      input[type="submit"] {
+        padding: 10px; /* Add padding inside the submit button */
+        background-color: #f1e2a3; /* Match the container background */
+        border: 1px solid #ccc; /* Add a border */
+        border-radius: 5px; /* Rounded corners for the submit button */
+        cursor: pointer; /* Change cursor to pointer on hover */
+      }
+      input[type="submit"]:hover {
+        background-color: #e1d0a0; /* Slightly darker background on hover */
       }
       img {
-        max-width: 20%; /* Ensure the image scales responsively */
+        max-width: 100%; /* Ensure the image scales responsively */
         height: auto; /* Maintain aspect ratio */
+      }
+      .flash {
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        text-align: center;
+      }
+      .flash.error {
+        background-color: #f8d7da;
+        color: #721c24;
+      }
+      .flash.success {
+        background-color: #d4edda;
+        color: #155724;
       }
     </style>
   </head>
   <body>
-    <div class="logo-container">
-      <img src="{{url_for('static', filename='logo_with_bg.png')}}" alt="Logo">
-    </div>
-    <div class="container">
-      <form action="" method="post">
-        <input type="text" name="username_submitted" required>
-        <input type="submit" value="Submit">
-        {% if error_message %}
-            <p style="color: red;">{{ error_message }}</p>
-        {% endif %}
-        <input type="checkbox" id="vehicle1" name="movie_mode" value=1>
-        <label for="movie_mode"> Use last 30 movies?</label><br>
-      </form>
+    <div class="wrapper">
+      <div class="logo-container">
+        <img src="{{ url_for('static', filename='logo_with_bg.png') }}" alt="Logo">
+      </div>
+      <div class="container">
+        <form action="" method="post">
+          <input type="text" name="username_submitted" required>
+          <input type="submit" value="Submit">
+          {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+              {% for category, message in messages %}
+                <div class="flash {{ category }}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            {% endif %}
+          {% endwith %}
+          <input type="checkbox" id="vehicle1" name="movie_mode" value="1">
+          <label for="movie_mode"> Use last 30 movies?</label><br>
+        </form>
+      </div>
     </div>
   </body>
 </html>

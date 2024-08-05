@@ -4,27 +4,20 @@ import os
 from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
-if os.path.isfile('.env'):
-    DATABASE = "./sqlitedata/database.sqlite3"
-else:
-    DATABASE = "/sqlitedata/database.sqlite3"
 # =========================================
 
-from datetime import datetime
-from fetch_data import MovieCellBuilder
+
 from image_builder import build
 from ratio_tester import get_moviecells
-from flask import Flask, redirect, url_for, request, session, send_file, render_template, g
+from flask import Flask, redirect, url_for, request, session, send_file, render_template, g, flash
 import io
 import base64
 import secrets
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask_session import Session
 from bleach import clean
 import sqlite3
 from uuid import uuid4
 import time
-
 # setting up flask app
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -35,7 +28,7 @@ Session(app)
 def get_db():
     db = getattr(g, "_database", None)
     if db is None:
-        db = g._database = sqlite3.connect(DATABASE, timeout=10)
+        db = g._database = sqlite3.connect(os.environ['DATABASE'], timeout=10)
         cur = db.cursor()
         cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
         cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
@@ -65,8 +58,10 @@ def download_image(username: str, task_id: str):
 @app.route('/', methods=['GET', 'POST'])
 def main_form():
     if request.method == 'GET':
-        count_message = num_of_rows()
-        return render_template('main_form.html', error_message=count_message)
+        # count_message = num_of_rows()
+        # to debug database uncomment vv
+        # return render_template('main_form.html', error_message=count_message)
+        return render_template('main_form.html')
     
     submitted_username = clean(request.form['username_submitted'])
     movie_mode = 0
@@ -82,6 +77,7 @@ def task_page(task_id: str):
     screen for displaying progress updates on the current task.
     task should be pushed to db before this is called.
     '''
+    # READY, QUEUED, ERROR, COLLECTING, BUILDING MOSAIC
 
     cur = get_db().cursor()
     cur.execute(f"""
@@ -96,12 +92,14 @@ def task_page(task_id: str):
         if status == 'COMPLETE':
             # result has been pushed by worker
             # redirect to page to show user the image_string
+            time.sleep(2)
             return redirect(url_for('dynamic_page', username=username, task_id=task_id))
         elif status == 'ERROR':
-            return render_template('main_form.html', error_message=error_msg)
+            flash(error_msg, 'error')
+            return redirect(url_for('main_form'))
 
         # task still loading
-        return render_template('task_page.html', progress_msg=progress_msg)
+        return render_template('task_page.html', progress_msg=progress_msg, status=status)
     else:
         return redirect(url_for('main_form', error_message=f'TASK: {task} | TASK_ID: {task_id}'))
     # serve an html page that uses the meta tag to refresh to display the current progress_msg

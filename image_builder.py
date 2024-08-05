@@ -9,6 +9,11 @@ import json
 from functools import partial
 import datetime
 from math import ceil
+import os
+
+
+ICONS_DIR = os.environ['ICONS_DIR']
+STAR_W, STAR_H = 12, 12 # make this into config.json val
 
 def trans_paste(fg_img, bg_img, alpha=1.0, box=(0, 0)):
     fg_img_trans = Image.new("RGBA", fg_img.size)
@@ -21,7 +26,7 @@ def resize_image(im: Image, thumbnail_size: tuple) -> Image:
 
 def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
 	if not cell.im_path:
-		return Image.open('NoPoster.png')
+		return Image.open(os.environ['STATIC_DIR'] + '/logo_with_bg.png')
 	return Image.open(cell.im_path)
 
 def build_background(thumbnail_width: int, thumbnail_height: int,
@@ -40,22 +45,45 @@ def get_max_text_size(text_drawer: ImageDraw, font: ImageFont, text_list: list) 
 		max_width = max(text_drawer.textsize(text, font))
 	return max(max_width, MIN_WIDTH)
 
+def build_rating_image(movie_cell: "Moviecell", full_star: Image, half_star: Image, empty_star: Image) -> Image:
+
+    # every star is 10x10*5 = (50x10)
+    # create transparent image to paste stars onto
+    backdrop = Image.new(
+          mode='RGBA',
+          size=(STAR_W*5, STAR_H),
+          color=(255, 0, 0, 0)
+    )
+    order = ['e' for _ in range(5)]
+    if movie_cell.rating != -1:
+        half_stars = ceil(movie_cell.rating % 1)
+        for i in range(int(movie_cell.rating)):
+            order[i] = 'f'
+        if half_stars:
+            order[int(movie_cell.rating)] = 'h'
+    
+    # order list should be built now
+    for index, code in enumerate(order):
+        box = (index*STAR_W, 0, (index+1)*STAR_W, STAR_H)
+        im: Image
+        match code:
+            case 'f':
+                im = full_star
+                pass
+            case 'h':
+                im = half_star
+                pass
+            case 'e':
+                im = empty_star
+                pass
+
+        backdrop.paste(im=im, box=box)
+
+    return backdrop
+
+
 def build_movie_text(movie_cell: "MovieCell") -> str:
-	#(★ or ☆ or ⯨).
-    if movie_cell.rating == -1:
-        star_str = '-----'
-    else:
-        empty_stars = 5 - movie_cell.rating # get empty stars with decimal
-        half_stars = movie_cell.rating % 1 # get decimal (half stars)
-        empty_stars = int(empty_stars - half_stars) # take off half stars then round down 
-        star_str = f'{'★' * int(movie_cell.rating)}{'⯨' * ceil(half_stars)}{'☆' * empty_stars}'
-	
-	# rating_str = f'{}'
-    mv_text = f'{star_str} - {movie_cell.title} - {movie_cell.director}'
-	# if len(mv_text) > 68:
-	# 	director = movie_cell.director.split(' ')
-	# 	director[-1] = director[-1][0]
-	# 	mv_text = f'{movie_cell.title} - {' '.join(map(str, director)) }'
+    mv_text = f' - {movie_cell.title} - {movie_cell.director}'
     return mv_text
 
 def get_text_dimensions(text_string: str, font: ImageFont.truetype):
@@ -100,11 +128,14 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
     thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
 
+    star_icons = [Image.open(f'{ICONS_DIR}/{fp}') for fp in ['full_rz.png', 'half_rz.png', 'empty_rz.png']]
+    
+    build_rating_image(movie_cells[0], *star_icons)
+
     
     # defining fonts
     info_font = ImageFont.truetype('./font/JuliaMono-Bold.ttf', movie_info_font_size, encoding='utf-8')
     username_font = ImageFont.truetype('./font/JuliaMono-Bold.ttf', username_font_size, encoding='utf-8')
-	
 
     # load all movie_texts into a list then find max width
     movie_text = [build_movie_text(movie_cells[i]) for i in range(len(movie_cells))]
@@ -150,13 +181,15 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
             txt_y = (j % grid_width) * thumb_height + image_gap * ((j % grid_width) + 1) + (i*20) + username_box_height
 
             txt_str = movie_text[cell_index]
-            print(f'{txt_str} -> {len(txt_str)}')
 
-            text_drawer.text((txt_x, txt_y), txt_str, font=info_font, fill=tuple(font_color))
+            text_drawer.text((txt_x + (STAR_W*5), txt_y), txt_str, font=info_font, fill=tuple(font_color))
+
+            # bg.paste(build_rating_image(movie_cells[cell_index], *star_icons), (txt_x, txt_y + 5))
 
             # bg.paste(star, (im_x, im_y + star.size[1] - star.size[1]))
 
             # bg = trans_paste(star, bg, alpha=1.0, box=(im_x, im_y + star.size[1] - star.size[1]))
+            bg = trans_paste(build_rating_image(movie_cells[cell_index], *star_icons), bg, alpha=1.0, box=(txt_x, txt_y+(STAR_H//2) - 1))
             cell_index += 1
 
     return bg

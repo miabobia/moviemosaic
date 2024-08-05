@@ -7,6 +7,9 @@ import sqlite3
 from datetime import datetime, timedelta
 import os
 from time import sleep
+from dotenv import load_dotenv
+if os.path.isfile('.env'):
+    load_dotenv('.env')
 
 DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
 EXPIRY_TIME = 300 #43200 # how many seconds until result is expired
@@ -78,15 +81,18 @@ def main(db: sqlite3.Connection):
 
 if __name__ == '__main__':
 
-    db = sqlite3.connect(DATABASE)
+    db = sqlite3.connect(os.environ['DATABASE'])
     cur = db.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
     cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
     cur.close()
     db.commit()
-    # remove_expired_tasks(db)
-    # db.commit()
-    main(db)
+    removed_entries = remove_expired_tasks(db)
+    db.commit()
+
+    if removed_entries:
+        print(f'REMOVED {removed_entries} ROWS')
+    # main(db)
 
 # }, "minutecron": {
 #     "type": "cron",
