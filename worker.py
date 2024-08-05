@@ -17,7 +17,11 @@ import logging
 
 logging.basicConfig(filename='worker.log',
                     level=logging.INFO,
-                    format='%(asctime)s - %(levelname)s - %(message)s')
+                    format='%(asctime)s - %(levelname)s - %(message)s',
+                    handlers=[
+                        logging.FileHandler('worker.log'),  # Log to file
+                        logging.StreamHandler()  # Log to console
+                    ])
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
