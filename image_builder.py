@@ -128,7 +128,7 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
     thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
 
-    star_icons = [Image.open(ICONS_DIR + '/' + fp) for fp in ['full_rz.png', 'half_rz.png', 'empty_rz.png']]
+    star_icons = [Image.open(ICONS_DIR + fp) for fp in ['full_rz.png', 'half_rz.png', 'empty_rz.png']]
     
     build_rating_image(movie_cells[0], *star_icons)
 
@@ -152,7 +152,7 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
     # writing username and date to image
     my_date = datetime.datetime.now()
     username_str = f'{username} - '
-    if not last_watch_date is None:
+    if last_watch_date:
         username_str = f'{username_str}{last_watch_date.strftime("%B")} {last_watch_date.strftime("%Y")} - {my_date.strftime("%B")} {my_date.strftime("%Y")}'		
     else:
         username_str = f'{username_str}{my_date.strftime("%B")} {my_date.strftime("%Y")}'
