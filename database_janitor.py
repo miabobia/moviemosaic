@@ -11,8 +11,7 @@ from dotenv import load_dotenv
 if os.path.isfile('.env'):
     load_dotenv('.env')
 
-DATABASE = "./sqlitedata/database.sqlite3" if os.path.isfile('.env') else "/sqlitedata/database.sqlite3"
-EXPIRY_TIME = 300 #43200 # how many seconds until result is expired
+EXPIRY_TIME = 3600
 
 def get_results(db: sqlite3.Connection):
     '''

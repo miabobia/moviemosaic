@@ -6,10 +6,7 @@ if os.path.isfile('.env'):
     load_dotenv('.env')
 # =========================================
 
-
-from image_builder import build
-from ratio_tester import get_moviecells
-from flask import Flask, redirect, url_for, request, session, send_file, render_template, g, flash
+from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash
 import io
 import base64
 import secrets

@@ -15,14 +15,7 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 - add caching for movie posters
     - use shared memory/multiproccessing to handle cacheing
     - i wrote cache.py as an LRU cache with deque and set. Need to make instance of it and share between server.py and a worker process for proper caching
-- change right side of image so it resizes based on max text length
 - change font?
+- there is something fishy going on with the username_info text. I think i set it up wrong for displaying the last date only if they choose the last 30 days option
 
-- clean up server.py it is functional but lots of old code in there needs to be pruned. change pages so they follow correct convention eg (/userrr/ -> /user/)
-- refactor cleanup on the database. try to make it into a cron intstead of worker process
-    - need to figure out how to deal with locking errors. adding retries and timeouts might be the move
-    - make sure every task has an entry in the results table even if it is an error
-    - janitor should only be deleting tasks that have a complete or ERROR status. should never delete something in progress
-
-- figure out how to implement flashes to display errors
-- add gifs for progress messages? make progress messages display on main page instead of redirecting to loading screen?
+- need to add options to display last month?

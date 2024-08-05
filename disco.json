@@ -25,9 +25,9 @@
                     "destinationPath": "/images"
                 }
             ]
-        },"minutecron": {
+        },"database_cleaner": {
             "type": "cron",
-            "schedule": "* * * * *",
+            "schedule": "0 0 * * *",
             "command": "python database_janitor.py",
             "volumes": [
                 {
