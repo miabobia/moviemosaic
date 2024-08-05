@@ -132,7 +132,7 @@ def start_task(user: str, mode: int) -> str:
         INSERT INTO TASKS 
         VALUES (?, ?, ?, ?, ?, ?)
         """,
-        (task_id, user, mode, 'READY', 'READY', 'NULL')
+        (task_id, user, mode, 'TASK QUEUED', 'READY', 'NULL')
     )
     get_db().commit()
     return task_id
