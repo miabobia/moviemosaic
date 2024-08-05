@@ -13,16 +13,6 @@ from image_builder import build
 from datetime import datetime
 import io
 import base64
-# import logging
-
-# logging.basicConfig(
-#     filename='worker.log',
-#     format='%(asctime)s - %(levelname)s - %(message)s',
-#     encoding='utf-8',
-#     filemode='a',
-#     style='{',
-#     datefmt="%Y-%m-%d %H:%M"
-#     )
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
@@ -112,9 +102,6 @@ def main(db: sqlite3.Connection):
 
         # mark task as complete
         update_task_status(db, tasks[0][0], 'COMPLETE', 'ALL DONE!')
-
-        elapsed_time = datetime.now() - start_time
-        # logging.info(f'task {tasks[0][0]} processed in {elapsed_time}')
 
         # remove task from queue
         tasks.popleft()
