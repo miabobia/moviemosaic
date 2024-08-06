@@ -13,7 +13,7 @@ def get_director(tmdb_id: int, tmdb_type: str) -> str:
     '''
     response: dict
 
-    print(f'TMDB_ID: {tmdb_id} TMDB_TYPE: {tmdb_type}')
+    # print(f'TMDB_ID: {tmdb_id} TMDB_TYPE: {tmdb_type}')
 
     if tmdb_type == 'mv':
         movie = tmdb.Movies(tmdb_id)
@@ -45,7 +45,7 @@ def get_tmdb_poster_url(tmdb_id: int, tmdb_type: str) -> str:
     '''
     Takes in tmdb (movie or tv) id and returns url for poster
     '''
-    print(f'TMDB_ID: {tmdb_id} TMDB_TYPE: {tmdb_type}')
+    # print(f'TMDB_ID: {tmdb_id} TMDB_TYPE: {tmdb_type}')
     #http://image.tmdb.org/t/p/w500/your_poster_path
     file_path: str = ''
     if tmdb_type == 'mv':
@@ -70,5 +70,5 @@ def get_tmdb_poster_url(tmdb_id: int, tmdb_type: str) -> str:
     #     print(f'{key}')
 
     # file_path = image_dict['file_path']
-    print(f'file_path: {file_path}')
+    # print(f'file_path: {file_path}')
     return f'http://image.tmdb.org/t/p/w500/{file_path}'

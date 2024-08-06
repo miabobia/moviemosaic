@@ -15,30 +15,29 @@ from moviecell import MovieCell
 import os
 from PIL import Image
 from io import BytesIO
+from db_cache import dbCache
 
-async def download(name_url: tuple[str], session):
-    # url = name_url[1]
-    # filename = name_url[0]
+async def download(name_url: tuple[str], session, db_cache: dbCache):
     filename, url = name_url
-    if not url:
+
+    # file already exists or there is no poster to download
+    if db_cache.lookup(filename) or not url:
+        # print(f'{filename} cache hit!')
         return
+    
+    # stream image data from requests
     image_data: bytes
     async with session.get(url) as response:
         image_data = await response.read()
 
     with Image.open(BytesIO(image_data)) as img:
-
-        print(f'pre resize - {img.size}')
-
         img = img.resize((120, 180))
-
-        print(f'post resize - {img.size}')
         format = img.format if img.format else 'PNG'
-        # Save the resized image to a file
-        async with aiofiles.open(filename, "wb") as f:
-            with BytesIO() as buffer:
-                img.save(buffer, format=format)
-                await f.write(buffer.getvalue())
+        with BytesIO() as buffer:
+            img.save(buffer, format=format)
+            resized_image_data = buffer.getvalue()
+
+    db_cache.push(filename=filename, image_data=resized_image_data)
 
     # put in shared cache object here
     # it will check if 'filename' already exists
@@ -48,10 +47,10 @@ async def download(name_url: tuple[str], session):
     #     async with aiofiles.open(filename, "wb") as f:
     #         await f.write(await response.read())
 
-async def download_all(name_urls: list[tuple]):
+async def download_all(name_urls: list[tuple], db_cache: dbCache):
     async with aiohttp.ClientSession() as session:
         await asyncio.gather(
-            *[download(name_url, session=session) for name_url in name_urls]
+            *[download(name_url, session=session, db_cache=db_cache) for name_url in name_urls]
         )
 
 # going to make this into a class to avoid duplicate calls because front-end makes calls here to determine if user valid
@@ -143,7 +142,6 @@ class Transformer:
         def get_watched_date(item) -> datetime:
             date_val = item.find('letterboxd:watchedDate')
             date_split = date_val.string.split('-')
-            print(date_split)
             # date_split = re.split(pattern='<|>', string=str(item.find("letterboxd:watchedDate")))[2].split('-')
             return datetime(year=int(date_split[0]), month=int(date_split[1]), day=int(date_split[2]))
 
@@ -258,11 +256,12 @@ class MovieCellBuilder:
     _movie_data: list
     _status: tuple[bool, str]
 
-    def __init__(self, username: str, mode: int, status: tuple[bool, str] = None, movie_data: list = None) -> None:
+    def __init__(self, username: str, mode: int, db_cache: dbCache, status: tuple[bool, str] = None, movie_data: list = None) -> None:
 
         self._username = username
         self._mode = mode
         self._movie_data = None
+        self._db_cache = db_cache
 
         if status and status[0]:
             # class has been rehydrated and it has no good data
@@ -317,7 +316,7 @@ class MovieCellBuilder:
 
     def build_cells(self) -> list[MovieCell]:
         # download posters
-        asyncio.run(download_all(zip(self._movie_data[3], self._movie_data[4])))
+        asyncio.run(download_all(zip(self._movie_data[3], self._movie_data[4]), self._db_cache))
 
         # collect all needed components of MovieCell from self._transformer
         return [
@@ -329,11 +328,3 @@ class MovieCellBuilder:
                 self._movie_data[3]
             )
         ]
-
-    def to_dict(self) -> dict:
-        return {
-            '_username': self._username,
-            '_mode': self._mode,
-            '_status': self._status,
-            '_movie_data': self._movie_data
-        }

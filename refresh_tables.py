@@ -4,9 +4,12 @@ USAGE: disco run --project moviemosaic "python refresh_tables.py"
 '''
 
 import sqlite3
+import os
+from dotenv import load_dotenv
+if os.path.isfile('.env'):
+    load_dotenv('.env')
 
-
-db = sqlite3.connect("/sqlitedata/database.sqlite3")
+db = sqlite3.connect(os.environ['DATABASE'])
 
 db.execute("DROP TABLE IF EXISTS TASKS")
 db.execute("DROP TABLE IF EXISTS RESULTS")

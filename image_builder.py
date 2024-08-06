@@ -10,7 +10,8 @@ from functools import partial
 import datetime
 from math import ceil
 import os
-
+from io import BytesIO
+import sqlite3
 
 ICONS_DIR = os.environ['ICONS_DIR']
 STAR_W, STAR_H = 12, 12 # make this into config.json val
@@ -24,10 +25,31 @@ def trans_paste(fg_img, bg_img, alpha=1.0, box=(0, 0)):
 def resize_image(im: Image, thumbnail_size: tuple) -> Image:
 	return im.resize(size=thumbnail_size)
 
-def build_thumbnail(cell: "MovieCell", thumbnail_size: tuple) -> Image:
+def build_image_from_blob(image_blob: bytes) -> Image:
+    buffer = BytesIO(image_blob)
+    image = Image.open(buffer)
+    # buffer.close()
+    return image    
+
+def get_blob(db:sqlite3.Connection, filename: str) -> bytes:
+    cur = db.execute("""
+        SELECT IMAGEBLOB FROM DB_CACHE
+        WHERE FILENAME = ?
+                     """,(filename,))
+    
+    blob_tuple = cur.fetchone()
+    cur.close()
+    if not blob_tuple:
+        return None
+    
+    return blob_tuple[0]
+
+
+def build_thumbnail(cell: "MovieCell", db: sqlite3.Connection) -> Image:
 	if not cell.im_path:
 		return Image.open(os.environ['STATIC_DIR'] + '/NoPoster.png')
-	return Image.open(cell.im_path)
+	return build_image_from_blob(get_blob(db, cell.im_path))
+
 
 def build_background(thumbnail_width: int, thumbnail_height: int,
 					 grid_width: int, grid_height: int, text_width: int,
@@ -110,7 +132,7 @@ def load_config(path: str) -> list:
 			)
 
 
-def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_watch_date: datetime.datetime) -> Image.Image:
+def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_watch_date: datetime.datetime, db: sqlite3.Connection) -> Image.Image:
     '''
     Takes in list of MovieCell's and generates MovieMosaic image
     '''
@@ -125,7 +147,7 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
     grid_width, grid_height = get_grid_size(len(movie_cells))
 
     # creating thumbnails
-    thumbnails = list(map(partial(build_thumbnail, thumbnail_size=tuple(thumbnail_size)), movie_cells))
+    thumbnails = list(map(partial(build_thumbnail, db=db), movie_cells))
     thumb_width, thumb_height = thumbnails[0].size
     
 
@@ -174,7 +196,6 @@ def build(movie_cells: list["MovieCell"], username: str, config_path: str, last_
             # thumbnails
             im_x = i * thumb_width + image_gap * (i+1)
             im_y = j * thumb_height + image_gap * (j+1) + username_box_height
-
             bg.paste(thumbnails[cell_index], (im_x, im_y))
 
             # text

@@ -13,6 +13,7 @@ from image_builder import build
 from datetime import datetime
 import io
 import base64
+import db_cache
 
 def get_new_tasks(db: sqlite3.Connection) -> list:
     # check if there is a new task in TASKS
@@ -44,7 +45,7 @@ def push_result(db: sqlite3.Connection, task_id: str, result: str):
         )
     db.commit()
 
-def main(db: sqlite3.Connection):
+def main(db: sqlite3.Connection, db_cache: db_cache.dbCache):
     tasks = deque()
     while True:
         sleep(1)
@@ -68,7 +69,8 @@ def main(db: sqlite3.Connection):
         # 
         movie_cell_builder = MovieCellBuilder(
             username = tasks[0][1],
-            mode = int(tasks[0][2])
+            mode = int(tasks[0][2]),
+            db_cache=db_cache
         )
 
         status, err = movie_cell_builder.get_status()
@@ -88,7 +90,8 @@ def main(db: sqlite3.Connection):
             movie_cells=movie_cells,
             username=tasks[0][1],
             config_path='config.json',
-            last_watch_date=movie_cell_builder.get_last_movie_date()
+            last_watch_date=movie_cell_builder.get_last_movie_date(),
+            db=db
             )
         
         # image has been built now we need to store it in RESULTS table
@@ -106,6 +109,9 @@ def main(db: sqlite3.Connection):
         # remove task from queue
         tasks.popleft()
 
+        # testing to see object persistence
+        print(f'DB_CACHE: {str(db_cache)}')
+
 
 if __name__ == '__main__':
     # https://moviemosaic.org/user/shuval/d9a577be-2fef-4120-9a4a-ab464ff355b2
@@ -113,6 +119,7 @@ if __name__ == '__main__':
     cur = db.cursor()
     cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
     cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
+    cur.execute("CREATE TABLE IF NOT EXISTS DB_CACHE(FILENAME, IMAGEBLOB, LAST_USED_DATE)")
     cur.close()
     db.commit()
-    main(db)
+    main(db, db_cache.dbCache(100, db))

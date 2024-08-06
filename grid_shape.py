@@ -23,7 +23,6 @@ def get_grid_size(n: int) -> tuple:
 
 	while True:
 		factors = list(map(reorder_pair, get_factors(n)))
-		print(factors)
 		factor_ratios = list(map(factor_to_ratio, factors))
 		
 		if not valid_ratio_exists(factor_ratios, MAX_RATIO, MIN_RATIO):
