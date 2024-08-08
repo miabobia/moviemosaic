@@ -17,3 +17,6 @@ Generates grid of movies recently watched by a letterboxd user and their ratings
 - there is something fishy going on with the username_info text. I think i set it up wrong for displaying the last date only if they choose the last 30 days option
 
 - need to add options to display last month?
+
+- add column to RESULTS table that stores file_paths. I want file_paths to images served up in dynamic page instead of inserting blobs straight into HTML so browser can cache
+- database_janitor needs to account for this as well.
