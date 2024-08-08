@@ -75,7 +75,7 @@
       </div>
       <div class="container">
         <form action="" method="post">
-          <input type="text" name="username_submitted" required>
+          <input type="text" placeholder="letterboxd username" name="username_submitted" required>
           <input type="submit" value="Submit">
           {% with messages = get_flashed_messages(with_categories=True) %}
             {% if messages %}
