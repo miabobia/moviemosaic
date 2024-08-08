@@ -39,6 +39,10 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
+@app.route('/img/<string:task_id>')
+def mosaic_route(task_id: str):
+    return get_result(task_id=task_id)
+
 @app.route('/download/<string:username>/<string:task_id>')
 def download_image(username: str, task_id: str):
 
