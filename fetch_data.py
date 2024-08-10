@@ -22,7 +22,6 @@ async def download(name_url: tuple[str], session, db_cache: dbCache):
 
     # file already exists or there is no poster to download
     if db_cache.lookup(filename) or not url:
-        # print(f'{filename} cache hit!')
         return
     
     # stream image data from requests
