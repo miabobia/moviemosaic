@@ -94,6 +94,7 @@ def task_page(task_id: str):
             # result has been pushed by worker
             # redirect to page to show user the image_string
             time.sleep(2)
+            # save_result_image(task_id=task_id)
             return redirect(url_for('dynamic_page', username=username, task_id=task_id))
         elif status == 'ERROR':
             # return to home page with error message
@@ -117,7 +118,7 @@ def dynamic_page(username: str, task_id: str):
     download_url = url_for('download_image', username=username, task_id=task_id)
     # tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
     
-    tmp = url_for('mosaic_route', task_id=task_id)
+    image_url = save_result_image(task_id=task_id)
     
     return render_template('dynamic_page.html', image=tmp, download_url=download_url)
 
