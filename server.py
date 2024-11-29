@@ -43,6 +43,7 @@ def save_result_image(task_id: str) -> str:
     file_name = f'{str(uuid4())}.png'
     file_path = os.path.join(os.getcwd(), app.config['UPLOAD_FOLDER'], file_name)
 
+    print(f'FILE PATH: {file_path}')
     # with Image.open(BytesIO(image_data)) as img:
     #     img = img.resize((120, 180))
     #     format = img.format if img.format else 'PNG'
@@ -54,7 +55,6 @@ def save_result_image(task_id: str) -> str:
         f.write(base64.b64decode(get_result(task_id=task_id)))
         # f.write(BytesIO(get_result(task_id=task_id)))
 
-    print(f'FILE PATH: {file_path}')
 
     return file_name
     
