@@ -54,6 +54,8 @@ def save_result_image(task_id: str) -> str:
         f.write(base64.b64decode(get_result(task_id=task_id)))
         # f.write(BytesIO(get_result(task_id=task_id)))
 
+    print(f'FILE PATH: {file_path}')
+
     return file_name
     
 
