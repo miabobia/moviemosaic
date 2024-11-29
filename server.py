@@ -15,6 +15,9 @@ from bleach import clean
 import sqlite3
 from uuid import uuid4
 import time
+from PIL import Image
+from io import BytesIO
+
 # setting up flask app
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
@@ -40,10 +43,17 @@ def save_result_image(task_id: str) -> str:
     file_name = f'{str(uuid4())}.png'
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
 
-    with open(file_path, 'wb') as f:
-        f.write(get_result(task_id=task_id))
+    # with Image.open(BytesIO(image_data)) as img:
+    #     img = img.resize((120, 180))
+    #     format = img.format if img.format else 'PNG'
+    #     with BytesIO() as buffer:
+    #         img.save(buffer, format=format)
+    #         resized_image_data = buffer.getvalue()
 
-    return file_path
+    with open(file_path, 'wb') as f:
+        f.write(BytesIO(get_result(task_id=task_id)))
+
+    return file_name
     
 
 @app.route('/download/<string:username>/<string:task_id>')
@@ -120,7 +130,7 @@ def dynamic_page(username: str, task_id: str):
     
     image_url = save_result_image(task_id=task_id)
     
-    return render_template('dynamic_page.html', image=tmp, download_url=download_url)
+    return render_template('dynamic_page.html', image=image_url, download_url=download_url)
 
 # =====DATABASE FUNCTIONS=====
 def get_db():
