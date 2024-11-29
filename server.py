@@ -101,7 +101,10 @@ def dynamic_page(username: str, task_id: str):
     if image_string is None:
         return redirect(url_for('main_form'))
     download_url = url_for('download_image', username=username, task_id=task_id)
-    tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
+    # tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
+    
+    tmp = url_for('mosaic_route', task_id=task_id)
+    
     return render_template('dynamic_page.html', image=image_string, download_url=tmp)
 
 # =====DATABASE FUNCTIONS=====
