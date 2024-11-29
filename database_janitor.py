@@ -20,7 +20,7 @@ def get_results(db: sqlite3.Connection):
     '''
     cur = db.execute(
         """
-        SELECT * FROM RESULTS
+        SELECT * FROM RESULTSe
         """
         )
     rows = cur.fetchall()

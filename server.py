@@ -22,17 +22,6 @@ app.config["SESSION_TYPE"] = "filesystem"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
-def get_db():
-    db = getattr(g, "_database", None)
-    if db is None:
-        db = g._database = sqlite3.connect(os.environ['DATABASE'], timeout=10)
-        cur = db.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
-        cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
-        cur.close()
-        db.commit()
-    return db
-
 @app.teardown_appcontext
 def close_connection(exception):
     db = getattr(g, "_database", None)
@@ -59,9 +48,6 @@ def download_image(username: str, task_id: str):
 @app.route('/', methods=['GET', 'POST'])
 def main_form():
     if request.method == 'GET':
-        # count_message = num_of_rows()
-        # to debug database uncomment vv
-        # return render_template('main_form.html', error_message=count_message)
         return render_template('main_form.html')
     
     submitted_username = clean(request.form['username_submitted'])
@@ -96,6 +82,7 @@ def task_page(task_id: str):
             time.sleep(2)
             return redirect(url_for('dynamic_page', username=username, task_id=task_id))
         elif status == 'ERROR':
+            # return to home page with error message
             flash(error_msg, 'error')
             return redirect(url_for('main_form'))
 
@@ -114,19 +101,27 @@ def dynamic_page(username: str, task_id: str):
     if image_string is None:
         return redirect(url_for('main_form'))
     download_url = url_for('download_image', username=username, task_id=task_id)
-    return render_template('dynamic_page.html', image=image_string, download_url=download_url)
+    tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
+    return render_template('dynamic_page.html', image=image_string, download_url=tmp)
 
-def num_of_rows():
-    cur = get_db().cursor()
-    cur.execute("SELECT COUNT(*) FROM TASKS")
-    cnt = cur.fetchone()
-    cur.close()
-    return str(cnt[0])
+# =====DATABASE FUNCTIONS=====
+def get_db():
+    db = getattr(g, "_database", None)
+    if db is None:
+        db = g._database = sqlite3.connect(os.environ['DATABASE'], timeout=10)
+        cur = db.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS TASKS(id, user, mode, progress_msg, status, error_msg)")
+        cur.execute("CREATE TABLE IF NOT EXISTS RESULTS(id, result, created_on)")
+        cur.close()
+        db.commit()
+    return db
 
-# TASKS(id, user, mode, progress_msg, status, error_msg)")
 def start_task(user: str, mode: int) -> str:
     '''
     starts task in database and returns corresponding id of task
+    
+    TASKS structure:
+    id | user | mode | progress_msg | status | error_msg
     '''
 
     task_id = str(uuid4())
@@ -158,6 +153,5 @@ def get_result(task_id: str) -> str:
     return result
 
 if __name__ == "__main__":
-    # clear_data()
     app.run(host="0.0.0.0", port=8080, debug=True)
 
