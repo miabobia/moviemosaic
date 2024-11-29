@@ -6,7 +6,7 @@ if os.path.isfile('.env'):
     load_dotenv('.env')
 # =========================================
 
-from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash
+from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash, save
 import io
 import base64
 import secrets
@@ -19,6 +19,7 @@ import time
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
+app.config["UPLOAD_FOLDER"] = "results"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
@@ -30,7 +31,20 @@ def close_connection(exception):
 
 @app.route('/img/<string:task_id>')
 def mosaic_route(task_id: str):
+    # i need to save this image string as a file and temporarily store it on my server 
+    # with a reachable url
     return get_result(task_id=task_id)
+
+def save_result_image(task_id: str) -> str:
+    # takes image from database saves to server and returns url for image
+    file_name = f'{str(uuid4())}.png'
+    file_path = os.path.join(app.config['UPLOAD_FOLDER'], file_name)
+
+    with open(file_path, 'wb') as f:
+        f.write(get_result(task_id=task_id))
+
+    return file_path
+    
 
 @app.route('/download/<string:username>/<string:task_id>')
 def download_image(username: str, task_id: str):
@@ -105,7 +119,7 @@ def dynamic_page(username: str, task_id: str):
     
     tmp = url_for('mosaic_route', task_id=task_id)
     
-    return render_template('dynamic_page.html', image=image_string, download_url=tmp)
+    return render_template('dynamic_page.html', image=tmp, download_url=download_url)
 
 # =====DATABASE FUNCTIONS=====
 def get_db():
