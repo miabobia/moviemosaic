@@ -51,7 +51,8 @@ def save_result_image(task_id: str) -> str:
     #         resized_image_data = buffer.getvalue()
 
     with open(file_path, 'wb') as f:
-        f.write(BytesIO(get_result(task_id=task_id)))
+        f.write(base64.b64decode(get_result(task_id=task_id)))
+        # f.write(BytesIO(get_result(task_id=task_id)))
 
     return file_name
     
