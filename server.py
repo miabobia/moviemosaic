@@ -6,7 +6,7 @@ if os.path.isfile('.env'):
     load_dotenv('.env')
 # =========================================
 
-from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash
+from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash, read_image, make_response
 import io
 import base64
 import secrets
@@ -22,7 +22,7 @@ from io import BytesIO
 app = Flask(__name__)
 app.config["SESSION_PERMANENT"] = False
 app.config["SESSION_TYPE"] = "filesystem"
-app.config["UPLOAD_FOLDER"] = "results"
+app.config["UPLOAD_FOLDER"] = "/results"
 app.secret_key = secrets.token_urlsafe(16)
 Session(app)
 
@@ -37,6 +37,16 @@ def mosaic_route(task_id: str):
     # i need to save this image string as a file and temporarily store it on my server 
     # with a reachable url
     return get_result(task_id=task_id)
+
+@app.route('/images/<int:pid>.jpg')
+def get_image(pid):
+    image_binary = read_image(pid)
+    response = make_response(image_binary)
+    response.headers.set('Content-Type', 'image/jpeg')
+    response.headers.set(
+        'Content-Disposition', 'attachment', filename='%s.jpg' % pid)
+    return response
+
 
 def save_result_image(task_id: str) -> str:
     # takes image from database saves to server and returns url for image
@@ -58,6 +68,8 @@ def save_result_image(task_id: str) -> str:
     #     with BytesIO() as buffer:
     #         img.save(buffer, format=format)
     #         resized_image_data = buffer.getvalue()
+
+
 
     with open(file_path, 'wb') as f:
         f.write(base64.b64decode(get_result(task_id=task_id)))
