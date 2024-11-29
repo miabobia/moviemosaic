@@ -6,7 +6,7 @@ if os.path.isfile('.env'):
     load_dotenv('.env')
 # =========================================
 
-from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash, save
+from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash
 import io
 import base64
 import secrets
