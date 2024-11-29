@@ -41,7 +41,15 @@ def mosaic_route(task_id: str):
 def save_result_image(task_id: str) -> str:
     # takes image from database saves to server and returns url for image
     file_name = f'{str(uuid4())}.png'
-    file_path = os.path.join('/app/', app.config['UPLOAD_FOLDER'], file_name)
+    # file_path = os.path.join('/app/', app.config['UPLOAD_FOLDER'], file_name)
+
+    # Get the absolute path for the upload folder and ensure it exists
+    upload_folder = app.config['UPLOAD_FOLDER']
+    if not os.path.exists(upload_folder):
+        os.makedirs(upload_folder)
+
+    # Construct the full file path
+    file_path = os.path.join(upload_folder, file_name)
 
     print(f'FILE PATH: {file_path}')
     # with Image.open(BytesIO(image_data)) as img:
