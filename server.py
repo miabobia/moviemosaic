@@ -38,7 +38,7 @@ def mosaic_route(task_id: str):
     # with a reachable url
     return get_result(task_id=task_id)
 
-@app.route('/results/<int:task_id>.png')
+@app.route('/results/<string:task_id>.png')
 def get_image(task_id):
     image_binary = base64.b64decode(get_result(task_id=task_id))
     response = make_response(image_binary)
