@@ -6,7 +6,7 @@ if os.path.isfile('.env'):
     load_dotenv('.env')
 # =========================================
 
-from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash, read_image, make_response
+from flask import Flask, redirect, url_for, request, send_file, render_template, g, flash, make_response
 import io
 import base64
 import secrets
@@ -38,13 +38,13 @@ def mosaic_route(task_id: str):
     # with a reachable url
     return get_result(task_id=task_id)
 
-@app.route('/images/<int:pid>.jpg')
-def get_image(pid):
-    image_binary = read_image(pid)
+@app.route('/results/<int:task_id>.png')
+def get_image(task_id):
+    image_binary = base64.b64decode(get_result(task_id=task_id))
     response = make_response(image_binary)
-    response.headers.set('Content-Type', 'image/jpeg')
+    response.headers.set('Content-Type', 'image/png')
     response.headers.set(
-        'Content-Disposition', 'attachment', filename='%s.jpg' % pid)
+        'Content-Disposition', 'attachment', filename='%s.png' % task_id)
     return response
 
 
@@ -151,9 +151,9 @@ def dynamic_page(username: str, task_id: str):
     download_url = url_for('download_image', username=username, task_id=task_id)
     # tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
     
-    image_url = save_result_image(task_id=task_id)
+    # image_url = save_result_image(task_id=task_id)
     
-    return render_template('dynamic_page.html', image=image_url, download_url=download_url)
+    return render_template('dynamic_page.html', image=task_id, download_url=download_url)
 
 # =====DATABASE FUNCTIONS=====
 def get_db():
