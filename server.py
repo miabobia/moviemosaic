@@ -32,12 +32,6 @@ def close_connection(exception):
     if db is not None:
         db.close()
 
-@app.route('/img/<string:task_id>')
-def mosaic_route(task_id: str):
-    # i need to save this image string as a file and temporarily store it on my server 
-    # with a reachable url
-    return get_result(task_id=task_id)
-
 @app.route('/results/<string:task_id>.png')
 def get_image(task_id):
     image_binary = base64.b64decode(get_result(task_id=task_id))
@@ -46,38 +40,6 @@ def get_image(task_id):
     response.headers.set(
         'Content-Disposition', 'attachment', filename='%s.png' % task_id)
     return response
-
-
-def save_result_image(task_id: str) -> str:
-    # takes image from database saves to server and returns url for image
-    file_name = f'{str(uuid4())}.png'
-    # file_path = os.path.join('/app/', app.config['UPLOAD_FOLDER'], file_name)
-
-    # Get the absolute path for the upload folder and ensure it exists
-    upload_folder = app.config['UPLOAD_FOLDER']
-    if not os.path.exists(upload_folder):
-        os.makedirs(upload_folder)
-
-    # Construct the full file path
-    file_path = os.path.join(upload_folder, file_name)
-
-    print(f'FILE PATH: {file_path}')
-    # with Image.open(BytesIO(image_data)) as img:
-    #     img = img.resize((120, 180))
-    #     format = img.format if img.format else 'PNG'
-    #     with BytesIO() as buffer:
-    #         img.save(buffer, format=format)
-    #         resized_image_data = buffer.getvalue()
-
-
-
-    with open(file_path, 'wb') as f:
-        f.write(base64.b64decode(get_result(task_id=task_id)))
-        # f.write(BytesIO(get_result(task_id=task_id)))
-
-
-    return file_name
-    
 
 @app.route('/download/<string:username>/<string:task_id>')
 def download_image(username: str, task_id: str):
@@ -127,7 +89,6 @@ def task_page(task_id: str):
             # result has been pushed by worker
             # redirect to page to show user the image_string
             time.sleep(2)
-            # save_result_image(task_id=task_id)
             return redirect(url_for('dynamic_page', username=username, task_id=task_id))
         elif status == 'ERROR':
             # return to home page with error message
@@ -149,9 +110,6 @@ def dynamic_page(username: str, task_id: str):
     if image_string is None:
         return redirect(url_for('main_form'))
     download_url = url_for('download_image', username=username, task_id=task_id)
-    # tmp = "http://1.bp.blogspot.com/-ATEqe2jZk38/TVn6ZK6Z7NI/AAAAAAAAC6k/Ch8HHLG6NvY/s1600/papajohns+pizza+pepperoni.jpg"
-    
-    # image_url = save_result_image(task_id=task_id)
     
     return render_template('dynamic_page.html', image=task_id, download_url=download_url)
 
@@ -187,6 +145,7 @@ def start_task(user: str, mode: int) -> str:
     get_db().commit()
     return task_id
 
+# dont select *
 def get_result(task_id: str) -> str:
     cur = get_db().cursor()
     cur.execute("""
