@@ -12,6 +12,7 @@
         margin: 0 auto; /* Center the wrapper */
       }
       .logo-container {
+        display:flex; 
         background-color: #f1e2a3; /* light yellow */
         margin-top: 10px; /* 10px margin from the top of the screen */
         padding: 5%; /* 5% padding around the logo */
@@ -70,9 +71,12 @@
   </head>
   <body>
     <div class="wrapper">
-      <div class="logo-container">
+      <nav class="logo-container">
         <img src="{{ url_for('static', filename='logo_with_bg.png') }}" alt="Logo">
-      </div>
+        <div class="ad-banner elements">"?"</div>
+        <div class="ad-banner elements">"?"</div>
+        
+      </nav>
       <div class="container">
         <form action="" method="post">
           <input type="text" placeholder="letterboxd username" name="username_submitted" required>
@@ -103,3 +107,5 @@
     </script>
   </body>
 </html>
+
+<!-- flex box for ad banner  -->
